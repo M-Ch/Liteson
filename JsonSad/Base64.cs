@@ -46,12 +46,5 @@ namespace JsonSad
 
 			target.Write(remaining == 1 ? "==" : "=");
 		}
-
-		public static string Write(byte[] data)
-		{
-			var sw = new StringWriter();
-			Write(sw, data);
-			return sw.ToString();
-		}
 	}
 }

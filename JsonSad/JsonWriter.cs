@@ -50,6 +50,13 @@ namespace JsonSad
 			_target.Write('"');
 		}
 
+		public void Write(char value)
+		{
+			_target.Write('"');
+			_target.Write(value);
+			_target.Write('"');
+		}
+
 		public void Write(bool value) => _target.Write(value ? "true" : "false");
 		public void Write(byte value) => _target.Write(value);
 		public void Write(sbyte value) => _target.Write(value);
@@ -61,9 +68,34 @@ namespace JsonSad
 		public void Write(ulong value) => _target.Write(value);
 		public void Write(float value) => _target.Write(value.ToString(InvariantCulture));
 		public void Write(double value) => _target.Write(value.ToString(InvariantCulture));
+		public void Write(decimal value) => _target.Write(value.ToString(InvariantCulture));
+
+		public void Write(DateTime dateTime)
+		{
+			_target.Write('"');
+			_target.Write(dateTime.ToString(dateTime.Millisecond > 0 ? "yyyy-MM-ddTHH:mm:ss.FFFFFFF" : "yyyy-MM-ddTHH:mm:ss"));
+			_target.Write('"');
+		}
+
+		public void Write(TimeSpan timeSpan)
+		{
+			_target.Write('"');
+			_target.Write(timeSpan.ToString());
+			_target.Write('"');
+		}
+
+		public void Write(Guid value)
+		{
+			_target.Write('"');
+			_target.Write(value.ToString());
+			_target.Write('"');
+		}
 
 		public void Write(byte[] value)
 		{
+			_target.Write('"');
+			Base64.Write(_target, value);
+			_target.Write('"');
 		}
 
 		public void PropertyName(string name)

@@ -12,6 +12,7 @@ namespace JsonSad
 		private readonly string _tab;
 		private static readonly CultureInfo InvariantCulture = CultureInfo.InvariantCulture;
 		private static readonly string[] Unescapes = new string['\\'+1];
+		private int _arrayItemCount;
 
 		static JsonWriter()
 		{
@@ -31,10 +32,33 @@ namespace JsonSad
 			_newLine = settings.Indent ? Environment.NewLine : null;
 		}
 
-		public void BeginObject() => BeginItem('{');
-		public void EndObject() => EndItem('}');
-		public void BeginArray() => BeginItem('[');
-		public void EndArray() => EndItem(']');
+		public void BeginObject() => BeginComplex('{');
+
+		public void PropertyName(string name)
+		{
+			NewLine();
+			Write(name);
+			_target.Write(':');
+		}
+
+		public void NextObjectProperty() => _target.Write(',');
+
+		public void EndObject() => EndComplex('}');
+
+		public void BeginArray()
+		{
+			BeginComplex('[');
+			_arrayItemCount = 0;
+		}
+
+		public void ArrayItem()
+		{
+			if(_arrayItemCount++ > 0)
+				_target.Write(',');
+			NewLine();
+		}
+
+		public void EndArray() => EndComplex(']');
 
 		public void Write(string text)
 		{
@@ -57,6 +81,7 @@ namespace JsonSad
 			_target.Write('"');
 		}
 
+		public void WriteNull() => _target.Write("null");
 		public void Write(bool value) => _target.Write(value ? "true" : "false");
 		public void Write(byte value) => _target.Write(value);
 		public void Write(sbyte value) => _target.Write(value);
@@ -98,23 +123,17 @@ namespace JsonSad
 			_target.Write('"');
 		}
 
-		public void PropertyName(string name)
-		{
-			NewLine();
-			Write(name);
-			_target.Write(':');
-		}
-
-		private void BeginItem(char symbol)
+		private void BeginComplex(char symbol)
 		{
 			_target.Write(symbol);
 			_depth++;
 		}
 
-		private void EndItem(char symbol)
+		private void EndComplex(char symbol)
 		{
-			_target.Write(symbol);
 			_depth--;
+			NewLine();
+			_target.Write(symbol);
 		}
 
 		private void NewLine()

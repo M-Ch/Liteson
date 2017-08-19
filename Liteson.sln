@@ -12,6 +12,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Net46", "Net46\Net46.csproj", "{EDA8649B-4DC0-41FA-A3E1-D5C1E4ABC0FF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{679D85ED-E01E-4BDC-B57E-D3FC5C439917}"
+	ProjectSection(SolutionItems) = preProject
+		info.txt = info.txt
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetStandard", "NetStandard\NetStandard.csproj", "{2DD3BE6C-F977-44D6-BF13-5B9D8FE12D36}"
 EndProject

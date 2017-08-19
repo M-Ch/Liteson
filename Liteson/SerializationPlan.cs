@@ -11,21 +11,21 @@ namespace Liteson
 		public IReadOnlyList<Action<object, SerializationContext>> Steps { get; set; }
 
 		private static readonly Type GenericEnumerableType = typeof(IEnumerable<>);
-		private static readonly Type EnumerableType = typeof(IEnumerable);
+		private static readonly TypeInfo EnumerableType = typeof(IEnumerable).GetTypeInfo();
 
 		public static SerializationPlan ForType(Type type, Func<Type, TypeDescriptor> descriptorSource) => new SerializationPlan
 		{
-			Steps = EnumerableType.IsAssignableFrom(type)
+			Steps = EnumerableType.IsAssignableFrom(type.GetTypeInfo())
 				? new[] { ForCollection(type, descriptorSource) }
 				: ForComplex(type, descriptorSource).ToArray()
 		};
 
 		private static Action<object, SerializationContext> ForCollection(Type root, Func<Type, TypeDescriptor> descriptorSource)
 		{
-			var interfaces = root.GetInterfaces();
+			var interfaces = root.GetTypeInfo().ImplementedInterfaces.Select(i => i.GetTypeInfo()).ToList(); ;
 			var genericEnumerable = interfaces.FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == GenericEnumerableType);
 
-			var elementType = genericEnumerable?.GetGenericArguments()[0] ?? typeof(object);
+			var elementType = genericEnumerable?.GenericTypeArguments[0] ?? typeof(object);
 			var descriptor = descriptorSource(elementType);
 
 			return (obj, context) =>
@@ -44,7 +44,6 @@ namespace Liteson
 		private static IEnumerable<Action<object, SerializationContext>> ForComplex(Type root, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			var properties = root
-				.GetTypeInfo()
 				.GetRuntimeProperties()
 				.Where(i => i.GetMethod != null)
 				.ToList();

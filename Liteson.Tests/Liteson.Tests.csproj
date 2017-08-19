@@ -72,9 +72,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\JsonSad\JsonSad.csproj">
+    <ProjectReference Include="..\Liteson\Liteson.csproj">
       <Project>{c3b7ece3-0b28-43ac-bca9-7a0cf1cbd71a}</Project>
-      <Name>JsonSad</Name>
+      <Name>Liteson</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

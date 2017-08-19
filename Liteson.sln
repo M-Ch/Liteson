@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.8
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonSad", "JsonSad\JsonSad.csproj", "{C3B7ECE3-0B28-43AC-BCA9-7A0CF1CBD71A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liteson", "Liteson\Liteson.csproj", "{C3B7ECE3-0B28-43AC-BCA9-7A0CF1CBD71A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonSad.Tests", "JsonSad.Tests\JsonSad.Tests.csproj", "{D594E027-8B1F-4290-AA6F-D9E5C45F845F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liteson.Tests", "Liteson.Tests\Liteson.Tests.csproj", "{D594E027-8B1F-4290-AA6F-D9E5C45F845F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

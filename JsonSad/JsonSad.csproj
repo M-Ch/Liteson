@@ -42,10 +42,12 @@
   <ItemGroup>
     <Compile Include="Base64.cs" />
     <Compile Include="CollectionExtensions.cs" />
+    <Compile Include="DateTimeExtensions.cs" />
     <Compile Include="JsonConvert.cs" />
     <Compile Include="JsonWriter.cs" />
     <Compile Include="ObjectWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReflectionUtils.cs" />
     <Compile Include="SerializationContext.cs" />
     <Compile Include="SerializationPlan.cs" />
     <Compile Include="TypeCatalog.cs" />

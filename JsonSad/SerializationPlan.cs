@@ -63,11 +63,12 @@ namespace JsonSad
 				if (it++ > 0)
 					yield return (obj, context) => context.Writer.NextObjectProperty();
 
+				var getter = ReflectionUtils.BuildGetter(property);
 				yield return (obj, context) =>
 				{
 					var writer = context.Writer;
 					writer.PropertyName(property.Name);
-					var value = property.GetValue(obj);
+					var value = getter(obj);
 					ObjectWriter.Write(value, context, subDescriptor.SerializationPlan);
 				};
 			}

@@ -98,7 +98,7 @@ namespace JsonSad
 		public void Write(DateTime dateTime)
 		{
 			_target.Write('"');
-			_target.Write(dateTime.ToString(dateTime.Millisecond > 0 ? "yyyy-MM-ddTHH:mm:ss.FFFFFFF" : "yyyy-MM-ddTHH:mm:ss"));
+			dateTime.WriteIsoFormatFast(_target);
 			_target.Write('"');
 		}
 

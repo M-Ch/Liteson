@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.IO;
 
-namespace JsonSad
+namespace Liteson
 {
 	internal class JsonWriter
 	{

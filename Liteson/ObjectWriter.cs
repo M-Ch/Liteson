@@ -1,4 +1,4 @@
-﻿namespace JsonSad
+﻿namespace Liteson
 {
 	internal static class ObjectWriter
 	{

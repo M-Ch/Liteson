@@ -2,7 +2,7 @@
 using System.IO;
 using System.Runtime.CompilerServices;
 
-namespace JsonSad
+namespace Liteson
 {
 	internal static class FormattingExtensions
 	{

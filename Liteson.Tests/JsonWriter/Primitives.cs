@@ -5,17 +5,17 @@ using FluentAssertions;
 using Xunit;
 using Newton = Newtonsoft.Json.JsonConvert;
 
-namespace JsonSad.Tests.JsonWriter
+namespace Liteson.Tests.JsonWriter
 {
 	public class Primitives
 	{
 		private readonly StringWriter _sw;
-		private readonly JsonSad.JsonWriter _writer;
+		private readonly Liteson.JsonWriter _writer;
 
 		public Primitives()
 		{
 			_sw = new StringWriter();
-			_writer = new JsonSad.JsonWriter(_sw, new WriterSettings());
+			_writer = new Liteson.JsonWriter(_sw, new WriterSettings());
 		}
 
 		[Theory]

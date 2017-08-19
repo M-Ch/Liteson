@@ -2,17 +2,17 @@
 using FluentAssertions;
 using Xunit;
 
-namespace JsonSad.Tests.JsonWriter
+namespace Liteson.Tests.JsonWriter
 {
 	public class NoIdenting
 	{
 		private readonly StringWriter _sw;
-		private readonly JsonSad.JsonWriter _writer;
+		private readonly Liteson.JsonWriter _writer;
 
 		public NoIdenting()
 		{
 			_sw = new StringWriter();
-			_writer = new JsonSad.JsonWriter(_sw, new WriterSettings());
+			_writer = new Liteson.JsonWriter(_sw, new WriterSettings());
 		}
 
 		[Fact]

@@ -4,7 +4,7 @@ using System.Text;
 using FluentAssertions;
 using Xunit;
 
-namespace JsonSad.Tests
+namespace Liteson.Tests
 {
 	public class Base64EncodingTests
 	{

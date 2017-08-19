@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace JsonSad
+namespace Liteson
 {
 	internal static class Base64
 	{

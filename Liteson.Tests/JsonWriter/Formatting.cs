@@ -2,17 +2,17 @@
 using FluentAssertions;
 using Xunit;
 
-namespace JsonSad.Tests.JsonWriter
+namespace Liteson.Tests.JsonWriter
 {
 	public class Formatting
 	{
 		private readonly StringWriter _sw;
-		private readonly JsonSad.JsonWriter _writer;
+		private readonly Liteson.JsonWriter _writer;
 
 		public Formatting()
 		{
 			_sw = new StringWriter();
-			_writer = new JsonSad.JsonWriter(_sw, new WriterSettings {Indent = true});
+			_writer = new Liteson.JsonWriter(_sw, new WriterSettings {Indent = true});
 		}
 
 		[Fact]

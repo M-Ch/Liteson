@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace JsonSad
+namespace Liteson
 {
 	internal static class ReflectionUtils
 	{

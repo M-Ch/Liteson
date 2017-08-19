@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace JsonSad
+namespace Liteson
 {
 	internal class TypeDescriptor
 	{

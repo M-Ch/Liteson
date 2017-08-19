@@ -4,7 +4,7 @@ using FluentAssertions;
 using Xunit;
 using Newton = Newtonsoft.Json.JsonConvert;
 
-namespace JsonSad.Tests
+namespace Liteson.Tests
 {
 	public class Serialization
 	{

@@ -7,8 +7,8 @@
     <ProjectGuid>{D594E027-8B1F-4290-AA6F-D9E5C45F845F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>JsonSad.Tests</RootNamespace>
-    <AssemblyName>JsonSad.Tests</AssemblyName>
+    <RootNamespace>Liteson.Tests</RootNamespace>
+    <AssemblyName>Liteson.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

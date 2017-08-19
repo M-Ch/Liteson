@@ -4,12 +4,12 @@ using Xunit;
 
 namespace Liteson.Tests.JsonWriter
 {
-	public class NoIdenting
+	public class NoIndenting
 	{
 		private readonly StringWriter _sw;
 		private readonly Liteson.JsonWriter _writer;
 
-		public NoIdenting()
+		public NoIndenting()
 		{
 			_sw = new StringWriter();
 			_writer = new Liteson.JsonWriter(_sw, new WriterSettings());

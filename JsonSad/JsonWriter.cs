@@ -87,7 +87,7 @@ namespace JsonSad
 		public void Write(sbyte value) => _target.Write(value);
 		public void Write(short value) => _target.Write(value);
 		public void Write(ushort value) => _target.Write(value);
-		public void Write(int value) => _target.Write(value);
+		public void Write(int value) => value.WriteFast(_target);
 		public void Write(uint value) => _target.Write(value);
 		public void Write(long value) => _target.Write(value);
 		public void Write(ulong value) => _target.Write(value);

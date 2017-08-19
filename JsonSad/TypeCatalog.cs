@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace JsonSad
 {
 	internal class TypeCatalog
 	{
-
 		private Dictionary<Type, TypeDescriptor> _descriptors = new List<TypeDescriptor>
 		{
 			ForPrimitive<byte>((v, c) => c.Writer.Write((byte) v)),
@@ -47,7 +44,7 @@ namespace JsonSad
 			return descriptors[type];
 		}
 
-		private TypeDescriptor CreateDescriptorTree(Type root, Dictionary<Type, TypeDescriptor> subDescriptors, Func<Type, TypeDescriptor> descriptorSource)
+		private static TypeDescriptor CreateDescriptorTree(Type root, Dictionary<Type, TypeDescriptor> subDescriptors, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			var descriptor = new TypeDescriptor
 			{

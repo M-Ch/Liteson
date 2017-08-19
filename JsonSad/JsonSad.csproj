@@ -42,7 +42,7 @@
   <ItemGroup>
     <Compile Include="Base64.cs" />
     <Compile Include="CollectionExtensions.cs" />
-    <Compile Include="DateTimeExtensions.cs" />
+    <Compile Include="FormattingExtensions.cs" />
     <Compile Include="JsonConvert.cs" />
     <Compile Include="JsonWriter.cs" />
     <Compile Include="ObjectWriter.cs" />

@@ -1,24 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using FluentAssertions;
 using Xunit;
-using Xunit.Abstractions;
 using Newton = Newtonsoft.Json.JsonConvert;
 
 namespace JsonSad.Tests
 {
 	public class Serialization
 	{
-		private readonly ITestOutputHelper _output;
-
 		[Fact]
 		public void SimpleObject() => JsonConvert.Serialize(new {Foo = 1, Bar = 2}).ShouldBeEquivalentTo("{\"Foo\":1,\"Bar\":2}");
-
-		public Serialization(ITestOutputHelper output)
-		{
-			_output = output;
-		}
 
 		[Fact]
 		public void ComplexObject()
@@ -63,23 +54,6 @@ namespace JsonSad.Tests
 
 			JsonConvert.Serialize(data);
 			Newton.SerializeObject(data);
-			var sw = new Stopwatch();
-			sw.Start();
-			var it = 10000;
-			for (var a = 0; a < it; a++)
-				JsonConvert.Serialize(data);
-
-			var result = sw.Elapsed;
-
-			sw.Restart();
-			for(var a = 0; a < it; a++)
-				Newton.SerializeObject(data);
-
-			var result2 = sw.Elapsed;
-			_output.WriteLine($"My: {result}");
-			_output.WriteLine($"Newton: {result2}");
-
-			//result.ShouldBeEquivalentTo(aaa);
 		}
 
 		private class GameData

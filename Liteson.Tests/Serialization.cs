@@ -25,13 +25,13 @@ namespace Liteson.Tests
 					{
 						new ReleaseInfo
 						{
-							Date = DateTime.Now,
+							Date = DateTime.Parse("2017-08-19"),
 							Platforms = new[] {"psx", "pc", "xbox one"},
 							Region = "eu"
 						},
 						new ReleaseInfo
 						{
-							Date = DateTime.Now.AddDays(10),
+							Date = DateTime.Parse("2017-08-19").AddDays(10),
 							Platforms = new[] {"ps4"},
 							Region = "jp"
 						}
@@ -45,15 +45,14 @@ namespace Liteson.Tests
 					{
 						new ReleaseInfo
 						{
-							Date = DateTime.Now.AddYears(2),
+							Date = DateTime.Parse("2017-08-19").AddYears(2),
 							Region = "eu"
 						}
 					}
 				}
 			};
 
-			JsonConvert.Serialize(data);
-			Newton.SerializeObject(data);
+			JsonConvert.Serialize(data).ShouldBeEquivalentTo(Newton.SerializeObject(data));
 		}
 
 		private class GameData

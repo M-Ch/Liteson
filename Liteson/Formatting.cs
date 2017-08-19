@@ -4,9 +4,9 @@ using System.Runtime.CompilerServices;
 
 namespace Liteson
 {
-	internal static class FormattingExtensions
+	internal static class Formatting
 	{
-		public static void WriteIsoFormatFast(this DateTime dateTime, StringWriter writer)
+		public static void WriteIsoFormatFast(DateTime dateTime, StringWriter writer)
 		{
 			GetDatePart(dateTime.Ticks, out var year, out var month, out var day);
 			WriteFast(year, writer);
@@ -28,7 +28,7 @@ namespace Liteson
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void WriteFast(this int value, TextWriter target)
+		public static void WriteFast(int value, TextWriter target)
 		{
 			int div;
 			for (div = 1; div <= value; div *= 10)

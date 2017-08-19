@@ -34,7 +34,7 @@ namespace Liteson
 				return value;
 
 			var descriptors = new Dictionary<Type, TypeDescriptor>();
-			TypeDescriptor DescriptorSource(Type t) => _descriptors.GetIfPresent(t) ?? CreateDescriptorTree(t, descriptors, DescriptorSource);
+			TypeDescriptor DescriptorSource(Type t) => _descriptors.TryGetValue(t, out var descriptor) ? descriptor : CreateDescriptorTree(t, descriptors, DescriptorSource);
 
 			CreateDescriptorTree(type, descriptors, DescriptorSource);
 			foreach (var existing in _descriptors)

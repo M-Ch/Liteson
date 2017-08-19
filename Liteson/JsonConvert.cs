@@ -2,7 +2,7 @@
 
 namespace Liteson
 {
-	internal static class JsonConvert
+	public static class JsonConvert
 	{
 		private static readonly TypeCatalog Catalog = new TypeCatalog();
 		private static readonly WriterSettings DefaultSettings = new WriterSettings();

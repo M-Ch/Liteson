@@ -4,15 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C3B7ECE3-0B28-43AC-BCA9-7A0CF1CBD71A}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Liteson</RootNamespace>
-    <AssemblyName>Liteson</AssemblyName>
+    <ProjectGuid>{EDA8649B-4DC0-41FA-A3E1-D5C1E4ABC0FF}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Net46</RootNamespace>
+    <AssemblyName>Net46</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +23,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -40,17 +42,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Base64.cs" />
-    <Compile Include="Formatting.cs" />
-    <Compile Include="JsonConvert.cs" />
-    <Compile Include="JsonWriter.cs" />
-    <Compile Include="ObjectWriter.cs" />
+    <Compile Include="..\Liteson.merged.cs">
+      <Link>Liteson.merged.cs</Link>
+    </Compile>
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReflectionUtils.cs" />
-    <Compile Include="SerializationContext.cs" />
-    <Compile Include="SerializationPlan.cs" />
-    <Compile Include="TypeCatalog.cs" />
-    <Compile Include="TypeDescriptor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

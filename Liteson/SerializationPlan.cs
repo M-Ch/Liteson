@@ -22,7 +22,7 @@ namespace Liteson
 
 		private static Action<object, SerializationContext> ForCollection(Type root, Func<Type, TypeDescriptor> descriptorSource)
 		{
-			var interfaces = root.GetTypeInfo().ImplementedInterfaces.Select(i => i.GetTypeInfo()).ToList(); ;
+			var interfaces = root.GetTypeInfo().ImplementedInterfaces.Select(i => i.GetTypeInfo()).ToList();
 			var genericEnumerable = interfaces.FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == GenericEnumerableType);
 
 			var elementType = genericEnumerable?.GenericTypeArguments[0] ?? typeof(object);

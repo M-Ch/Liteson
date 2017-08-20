@@ -55,6 +55,20 @@ namespace Liteson.Tests.JsonWriter
 		[Fact] public void Date() => Run(() => _writer.Write(DateTime.Parse("2012-12-22 14:56:33.78"))).ShouldBeEquivalentTo(Newton.SerializeObject(DateTime.Parse("2012-12-22 14:56:33.78")));
 		[Fact] public void Time() => Run(() => _writer.Write(TimeSpan.FromDays(2.345))).ShouldBeEquivalentTo(Newton.SerializeObject(TimeSpan.FromDays(2.345)));
 
+		[Fact] public void UtcDate()
+		{
+			var date = DateTime.Parse("2013-10-20 13:21:56.678").ToUniversalTime();
+			Run(() => _writer.Write(date)).ShouldBeEquivalentTo(Newton.SerializeObject(date));
+		}
+
+		[Fact]
+		public void LocalDate()
+		{
+			var date = DateTime.Parse("2013-10-20 13:21:56.678").ToLocalTime();
+			Run(() => _writer.Write(date)).ShouldBeEquivalentTo(Newton.SerializeObject(date));
+		}
+
+
 		private string Run(Action action)
 		{
 			action();

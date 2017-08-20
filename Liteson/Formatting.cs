@@ -20,18 +20,55 @@ namespace Liteson
 			WriteDatePartFast(dateTime.Minute, writer);
 			writer.Write(':');
 			WriteDatePartFast(dateTime.Second, writer);
-			if (dateTime.Millisecond > 0)
+			var ms = dateTime.Millisecond;
+			if (ms > 0)
 			{
 				writer.Write('.');
-				WriteFast(dateTime.Millisecond, writer);
+				WriteFast(ms, writer);
+			}
+			if (dateTime.Kind == DateTimeKind.Utc)
+				writer.Write('Z');
+			else if (dateTime.Kind == DateTimeKind.Local)
+			{
+				var offset = TimeZoneInfo.Local.GetUtcOffset(dateTime);
+				writer.Write(offset.Ticks > 0 ? '+' : '-');
+				WriteDatePartFast(offset.Hours, writer);
+				writer.Write(':');
+				WriteDatePartFast(offset.Minutes, writer);
 			}
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void WriteFast(int value, TextWriter target)
 		{
+			if (value < 0)
+			{
+				target.Write('-');
+				value *= -1;
+			}
 			int div;
 			for (div = 1; div <= value; div *= 10)
+			{
+			}
+
+			do
+			{
+				div /= 10;
+				target.Write((char)('0' + (value / div)));
+				value %= div;
+			} while(value > 0);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void WriteFast(long value, TextWriter target)
+		{
+			if(value < 0)
+			{
+				target.Write('-');
+				value *= -1;
+			}
+			long div;
+			for(div = 1; div <= value; div *= 10)
 			{
 			}
 

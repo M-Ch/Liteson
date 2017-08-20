@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -18,17 +19,21 @@ namespace Liteson.Merger
 			var jsonConvert = main.FindClass("JsonConvert");
 			var unit = (CompilationUnitSyntax)main.GetRoot();
 			var usings = unit.ChildNodes().OfType<UsingDirectiveSyntax>().ToList();
+			var resultNs = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName("Liteson"));
 
 			void MergeFile(string filePath)
 			{
 				var catalog = CSharpSyntaxTree.ParseText(File.ReadAllText(filePath));
 				var ns = catalog.GetRoot().ChildNodes().First(i => i.Kind() == SyntaxKind.NamespaceDeclaration);
 
-				foreach (var node in ns.ChildNodes().OfType<ClassDeclarationSyntax>())
+				foreach (var node in ns.ChildNodes().OfType<BaseTypeDeclarationSyntax>())
 				{
 					var modified = RewriteAccess(node);
 					usings.AddRange(catalog.GetRoot().ChildNodes().OfType<UsingDirectiveSyntax>());
-					jsonConvert = jsonConvert.AddMembers(modified);
+					if(modified.Modifiers.Any(i => i.IsKind(SyntaxKind.InternalKeyword)))
+						resultNs = resultNs.AddMembers(modified);
+					else
+						jsonConvert = jsonConvert.AddMembers(modified);
 				}
 			}
 
@@ -36,7 +41,7 @@ namespace Liteson.Merger
 				MergeFile(file);
 
 			var filteredUsings = usings.DistinctBy(i => i.ToFullString()).OrderByDescending(i => i.ToFullString()).ToList();
-			var newNs = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName("Liteson")).AddMembers(RewriteAccess(jsonConvert));
+			var newNs = resultNs.WithMembers(new[] { RewriteAccess(jsonConvert) }.Concat(resultNs.Members).ToSyntaxList());
 			var result = SyntaxFactory.CompilationUnit(
 				SyntaxFactory.List<ExternAliasDirectiveSyntax>(),
 				SyntaxFactory.List(filteredUsings),
@@ -48,8 +53,17 @@ namespace Liteson.Merger
 			File.WriteAllText(Path.Combine(slnDir, "Liteson.merged.cs"), text);
 		}
 
-		private static ClassDeclarationSyntax RewriteAccess(ClassDeclarationSyntax classDeclaration) 
-			=> classDeclaration.WithModifiers(classDeclaration.Modifiers.Select(RewriteModifier));
+		private static BaseTypeDeclarationSyntax RewriteAccess(BaseTypeDeclarationSyntax declaration)
+		{
+			switch (declaration)
+			{
+				case ClassDeclarationSyntax classSyntax: return classSyntax.WithModifiers(classSyntax.Modifiers.Select(RewriteModifier));
+				case EnumDeclarationSyntax enumSyntax: return enumSyntax.WithModifiers(enumSyntax.Modifiers.Select(RewriteModifier));
+				case StructDeclarationSyntax structSyntax: return structSyntax.WithModifiers(structSyntax.Modifiers.Select(RewriteModifier));
+				default: throw new Exception($"Not supported top level syntax {declaration.GetType().Name}");
+			}
+		}
+
 
 		private static SyntaxToken RewriteModifier(SyntaxToken token)
 		{

@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base64.cs" />
+    <Compile Include="BufferPart.cs" />
     <Compile Include="Formatting.cs" />
     <Compile Include="JsonConvert.cs" />
     <Compile Include="JsonException.cs" />
@@ -48,11 +49,11 @@
     <Compile Include="JsonWriter.cs" />
     <Compile Include="ObjectWriter.cs" />
     <Compile Include="Parsing.cs" />
-    <Compile Include="PositionTrackingReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReflectionUtils.cs" />
     <Compile Include="SerializationContext.cs" />
     <Compile Include="SerializationPlan.cs" />
+    <Compile Include="StringBuffer.cs" />
     <Compile Include="TypeCatalog.cs" />
     <Compile Include="TypeDescriptor.cs" />
   </ItemGroup>

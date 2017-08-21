@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using Xunit;
@@ -64,8 +62,8 @@ namespace Liteson.Tests
 		[InlineData("<")]
 		public void InvalidTokens(string input)
 		{
-			var reader = new JsonReader(new StringReader(input));
-			Assert.Throws<JsonException>(() => reader.Read(out var _));
+			var reader = new JsonReader(input);
+			Assert.Throws<JsonException>(() => reader.Read());
 		}
 
 		[Theory]
@@ -77,18 +75,18 @@ namespace Liteson.Tests
 		[InlineData("a\\u111m")]
 		public void InvalidStrings(string input)
 		{
-			var reader = new JsonReader(new StringReader($"\"{input}\""));
-			Assert.Throws<JsonException>(() => reader.Read(out var _));
+			var reader = new JsonReader($"\"{input}\"");
+			Assert.Throws<JsonException>(() => reader.Read());
 		}
 
 		private IEnumerable<(JsonToken token, string buffer)> ReadTokens(string input)
 		{
-			var reader = new JsonReader(new StringReader(input));
+			var reader = new JsonReader(input);
 			while (!reader.IsAtEnd())
 			{
-				var token = reader.Read(out var buffer);
-				if(token != JsonToken.End)
-					yield return (token, buffer);
+				var result = reader.Read();
+				if(result.token != JsonToken.End)
+					yield return result;
 			}
 		}
 	}

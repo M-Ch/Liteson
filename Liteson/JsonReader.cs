@@ -10,6 +10,8 @@ namespace Liteson
 		private static readonly char[] Escapes = new char['t'+1];
 		private StringBuffer _buffer;
 		private readonly StringBuilder _stringBuilder = new StringBuilder();
+		public int Line => _buffer.Line;
+		public int Column => _buffer.Column;
 
 		static JsonReader()
 		{

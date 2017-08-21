@@ -42,9 +42,11 @@
   <ItemGroup>
     <Compile Include="Base64.cs" />
     <Compile Include="BufferPart.cs" />
+    <Compile Include="Exceptions.cs" />
     <Compile Include="Formatting.cs" />
     <Compile Include="JsonConvert.cs" />
     <Compile Include="JsonException.cs" />
+    <Compile Include="ParsedReading.cs" />
     <Compile Include="JsonReader.cs" />
     <Compile Include="JsonWriter.cs" />
     <Compile Include="ObjectWriter.cs" />

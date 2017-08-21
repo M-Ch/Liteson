@@ -8,24 +8,24 @@ namespace Liteson
 	{
 		private Dictionary<Type, TypeDescriptor> _descriptors = new List<TypeDescriptor>
 		{
-			ForPrimitive<byte>((v, c) => c.Writer.Write((byte) v)),
-			ForPrimitive<sbyte>((v, c) => c.Writer.Write((sbyte) v)),
-			ForPrimitive<char>((v, c) => c.Writer.Write((char) v)),
-			ForPrimitive<short>((v, c) => c.Writer.Write((short) v)),
-			ForPrimitive<ushort>((v, c) => c.Writer.Write((ushort) v)),
-			ForPrimitive<int>((v, c) => c.Writer.Write((int) v)),
-			ForPrimitive<uint>((v, c) => c.Writer.Write((uint) v)),
-			ForPrimitive<long>((v, c) => c.Writer.Write((long) v)),
-			ForPrimitive<ulong>((v, c) => c.Writer.Write((ulong) v)),
-			ForPrimitive<float>((v, c) => c.Writer.Write((float) v)),
-			ForPrimitive<double>((v, c) => c.Writer.Write((double) v)),
-			ForPrimitive<decimal>((v, c) => c.Writer.Write((decimal) v)),
-			ForPrimitive<byte[]>((v, c) => c.Writer.Write((byte[]) v)),
-			ForPrimitive<string>((v, c) => c.Writer.Write((string) v)),
-			ForPrimitive<object>((v, c) => c.Writer.Write(v.ToString())),
-			ForPrimitive<DateTime>((v, c) => c.Writer.Write((DateTime) v)),
-			ForPrimitive<TimeSpan>((v, c) => c.Writer.Write((TimeSpan) v)),
-			ForPrimitive<Guid>((v, c) => c.Writer.Write((Guid) v))
+			ForPrimitive<byte>((v, c) => c.Writer.Write((byte) v), r => ParsedReading.ReadByte(r)),
+			ForPrimitive<sbyte>((v, c) => c.Writer.Write((sbyte) v), r => ParsedReading.ReadSByte(r)),
+			ForPrimitive<char>((v, c) => c.Writer.Write((char) v), r => ParsedReading.ReadChar(r)),
+			ForPrimitive<short>((v, c) => c.Writer.Write((short) v), r => ParsedReading.ReadShort(r)),
+			ForPrimitive<ushort>((v, c) => c.Writer.Write((ushort) v), r => ParsedReading.ReadUShort(r)),
+			ForPrimitive<int>((v, c) => c.Writer.Write((int) v), r => ParsedReading.ReadInt(r)),
+			ForPrimitive<uint>((v, c) => c.Writer.Write((uint) v), r => ParsedReading.ReadUInt(r)),
+			ForPrimitive<long>((v, c) => c.Writer.Write((long) v), r => ParsedReading.ReadLong(r)),
+			ForPrimitive<ulong>((v, c) => c.Writer.Write((ulong) v), r => ParsedReading.ReadULong(r)),
+			ForPrimitive<float>((v, c) => c.Writer.Write((float) v), r => ParsedReading.ReadFloat(r)),
+			ForPrimitive<double>((v, c) => c.Writer.Write((double) v), r => ParsedReading.ReadDouble(r)),
+			ForPrimitive<decimal>((v, c) => c.Writer.Write((decimal) v), r => ParsedReading.ReadDecimal(r)),
+			ForPrimitive<byte[]>((v, c) => c.Writer.Write((byte[]) v), ParsedReading.ReadByteArray),
+			ForPrimitive<string>((v, c) => c.Writer.Write((string) v), ParsedReading.ReadString),
+			ForPrimitive<object>((v, c) => c.Writer.Write(v.ToString()), null), //todo, can be anything
+			ForPrimitive<DateTime>((v, c) => c.Writer.Write((DateTime) v), r => ParsedReading.ReadDateTime(r)),
+			ForPrimitive<TimeSpan>((v, c) => c.Writer.Write((TimeSpan) v), r => ParsedReading.ReadTimeSpan(r)),
+			ForPrimitive<Guid>((v, c) => c.Writer.Write((Guid) v), r => ParsedReading.ReadGuid(r))
 		}.ToDictionary(i => i.Type);
 
 		public TypeDescriptor GetDescriptor(Type type)
@@ -61,12 +61,12 @@ namespace Liteson
 			return descriptor;
 		}
 
-		private static TypeDescriptor ForPrimitive<T>(Action<object, SerializationContext> serializer) => new TypeDescriptor
+		private static TypeDescriptor ForPrimitive<T>(Action<object, SerializationContext> writer, Func<JsonReader, object> reader) => new TypeDescriptor
 		{
 			Type = typeof(T),
 			SerializationPlan = new SerializationPlan
 			{
-				Steps = new[] {serializer}
+				Steps = new[] {writer}
 			}
 		};
 	}

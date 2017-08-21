@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace Liteson
 {
@@ -23,6 +24,34 @@ namespace Liteson
 
 			result = (char) (a << 12 | b << 8 | c << 4 | d);
 			return true;
+		}
+
+		private static readonly int MaxIntLength = int.MaxValue.ToString().Length;
+
+		public static bool TryParseBase10Int(string buffer, int start, int length, out int value)
+		{
+			value = 0;
+			var multiply = 1; 
+			if (buffer[start] == '-')
+			{
+				multiply = -1;
+				start++;
+				length--;
+			}
+			if (length > MaxIntLength)
+				return false;
+
+			for (var a = start + length - 1; a >= start; a--)
+			{
+				var digit = buffer[a] - '0';
+				if (digit < 0 || digit > 9)
+					return false;
+				value += digit * multiply;
+				multiply *= 10;
+			}
+
+			var isOverflow = length == MaxIntLength && ((value < 0 && multiply > 0) || (value > 0 && multiply < 0) || buffer[start] > '2');
+			return !isOverflow;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

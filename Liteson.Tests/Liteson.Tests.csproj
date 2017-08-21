@@ -65,10 +65,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base64EncodingTests.cs" />
+    <Compile Include="Deserialization.cs" />
     <Compile Include="JsonReaderTests.cs" />
     <Compile Include="JsonWriter\Formatting.cs" />
     <Compile Include="JsonWriter\NoIndenting.cs" />
     <Compile Include="JsonWriter\Primitives.cs" />
+    <Compile Include="ParsedReadingTests.cs" />
+    <Compile Include="ParsingTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serialization.cs" />
     <Compile Include="TestHelpers.cs" />

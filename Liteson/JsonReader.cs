@@ -155,7 +155,7 @@ namespace Liteson
 			while (true)
 			{
 				var current = _buffer.Peek();
-				if (current == '.' || current == 'e' || current == 'E' || IsWhitespace(current))
+				if (current == '.' || current == 'e' || current == 'E' || IsWhitespace(current) || current == ',' || current == '}' || current == ']')
 					return true;
 				if (current < '0' || current > '9')
 					return _buffer.IsAtEnd();

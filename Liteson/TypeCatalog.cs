@@ -39,7 +39,7 @@ namespace Liteson
 			var descriptors = new Dictionary<Type, TypeDescriptor>();
 			TypeDescriptor DescriptorSource(Type t) => _descriptors.TryGetValue(t, out var descriptor) 
 				? descriptor 
-				: CreateDescriptorTree(t, descriptors, DescriptorSource);
+				: descriptors.TryGetValue(t, out var local) ? local : CreateDescriptorTree(t, descriptors, DescriptorSource);
 
 			var result = CreateDescriptorTree(type, descriptors, DescriptorSource);
 			foreach (var existing in _descriptors)
@@ -57,13 +57,14 @@ namespace Liteson
 			};
 			subDescriptors.Add(root, descriptor);
 			descriptor.SerializationPlan = SerializationPlan.ForType(root, descriptorSource);
-
+			descriptor.Reader = TypeReader.ForType(root, descriptorSource);
 			return descriptor;
 		}
 
 		private static TypeDescriptor ForPrimitive<T>(Action<object, SerializationContext> writer, Func<JsonReader, object> reader) => new TypeDescriptor
 		{
 			Type = typeof(T),
+			Reader = reader,
 			SerializationPlan = new SerializationPlan
 			{
 				Steps = new[] {writer}

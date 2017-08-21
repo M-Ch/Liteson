@@ -9,6 +9,13 @@ namespace Liteson
 
 		public static string Serialize(object value) => Serialize(value, DefaultSettings);
 
+		public static T Deserialize<T>(string value)
+		{
+			var descriptor = Catalog.GetDescriptor(typeof(T));
+			var reader = new JsonReader(value);
+			return (T)descriptor.Reader(reader);
+		}
+
 		public static string Serialize(object value, WriterSettings settings)
 		{
 			if (value == null)

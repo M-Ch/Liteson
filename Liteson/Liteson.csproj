@@ -58,6 +58,7 @@
     <Compile Include="StringBuffer.cs" />
     <Compile Include="TypeCatalog.cs" />
     <Compile Include="TypeDescriptor.cs" />
+    <Compile Include="TypeReader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

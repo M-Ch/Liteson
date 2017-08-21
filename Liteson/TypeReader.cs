@@ -27,19 +27,19 @@ namespace Liteson
 				.GroupBy(i => i.Name)
 				.ToDictionary(i => i.Key, i => i.First());
 
-			var constructor = type.GetConstructor(Array.Empty<Type>());
-			if (constructor == null)
+			if (type.GetConstructor(Array.Empty<Type>()) == null)
 				throw new JsonException($"Type {type} must define public parameterless constructor.");
+			var constructor = ReflectionUtils.BuildConstructor(type);
 
 			return reader =>
 			{
 				var bufferPart = new BufferPart();
 				var token = reader.Read(ref bufferPart, out var _);
 				if (token == JsonToken.Null)
-					return type.IsValueType ? constructor.Invoke(Array.Empty<object>()) : null;
+					return type.IsValueType ? constructor() : null;
 				if (token != JsonToken.ObjectStart)
 					throw Exceptions.BadToken(reader, token, JsonToken.ObjectStart);
-				var value = constructor.Invoke(Array.Empty<object>());
+				var value = constructor();
 				while (true)
 				{
 					token = reader.Read(ref bufferPart, out var propertyName);

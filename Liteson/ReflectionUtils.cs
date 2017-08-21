@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace Liteson
 {
@@ -12,6 +13,16 @@ namespace Liteson
 		private static readonly MethodInfo ParametrizedActionInfo = typeof(ReflectionUtils)
 			.GetTypeInfo()
 			.GetDeclaredMethod(nameof(BuildParametrizedAction));
+
+		private static readonly MethodInfo BuildConstructorInfo = typeof(ReflectionUtils)
+			.GetTypeInfo()
+			.GetDeclaredMethod(nameof(BuildConstructorFunc));
+
+		public static Func<object> BuildConstructor(Type type)
+		{
+			var genericBuild = BuildConstructorInfo.MakeGenericMethod(type);
+			return (Func<object>)genericBuild.Invoke(null, Array.Empty<object>());
+		}
 
 		public static Func<object, object> BuildGetter(PropertyInfo property)
 		{
@@ -35,6 +46,17 @@ namespace Liteson
 		{
 			var bound = (Action<TTarget, TParam>)method.CreateDelegate(typeof(Action<TTarget, TParam>));
 			return (i,p) => bound((TTarget)i, (TParam)p);
+		}
+
+		public static Func<object> BuildConstructorFunc<T>()
+		{
+			var type = typeof(T);
+			var method = new DynamicMethod("$CtorCall" + type.Name, type, null, type);
+			var generator = method.GetILGenerator();
+			generator.Emit(OpCodes.Newobj, type.GetConstructor(Type.EmptyTypes));
+			generator.Emit(OpCodes.Ret);
+			var func = (Func<T>)method.CreateDelegate(typeof(Func<T>));
+			return () => func();
 		}
 	}
 }

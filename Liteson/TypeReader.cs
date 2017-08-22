@@ -27,24 +27,30 @@ namespace Liteson
 				.GroupBy(i => i.Name)
 				.ToDictionary(i => i.Key, i => i.First());
 
-			if (type.GetConstructor(Array.Empty<Type>()) == null)
+			if (type.IsClass && type.GetConstructor(Array.Empty<Type>()) == null)
 				throw new JsonException($"Type {type} must define public parameterless constructor.");
-			var constructor = ReflectionUtils.BuildConstructor(type);
+
+			var constructor = type.IsClass
+				? ReflectionUtils.BuildConstructor(type)
+				: () => Activator.CreateInstance(typeof(Box<>).MakeGenericType(type));
+			var unwrapper = !type.IsClass
+				? new Func<object, object>(i => ((IBox) i).Value)
+				: null;
 
 			return reader =>
 			{
 				var bufferPart = new BufferPart();
 				var token = reader.Read(ref bufferPart, out var _);
 				if (token == JsonToken.Null)
-					return type.IsValueType ? constructor() : null;
+					return type.IsClass ? (object)null : throw new JsonException($"Unable to assign null value to struct type near line {reader.Line}, column {reader.Column}.");
 				if (token != JsonToken.ObjectStart)
 					throw Exceptions.BadToken(reader, token, JsonToken.ObjectStart);
-				var value = constructor();
+				var target = constructor();
 				while (true)
 				{
 					token = reader.Read(ref bufferPart, out var propertyName);
 					if (token == JsonToken.ObjectEnd)
-						return value;
+						return unwrapper != null ? unwrapper(target) : target;
 					if (token != JsonToken.String)
 						throw Exceptions.BadToken(reader, token, JsonToken.String);
 
@@ -53,14 +59,14 @@ namespace Liteson
 					if (token != JsonToken.NameSeparator)
 						throw Exceptions.BadToken(reader, token, JsonToken.NameSeparator);
 
-					if(hasProperty)
-						property.Setter(value, property.Descriptor.Reader(reader));
+					if (hasProperty)
+						property.Setter(target, property.Descriptor.Reader(reader));
 					else
 						ValueSkipper.SkipNext(reader);
 
 					token = reader.Read(ref bufferPart, out var _);
 					if (token == JsonToken.ObjectEnd)
-						return value;
+						return unwrapper != null ? unwrapper(target) : target;
 					if(token != JsonToken.ValueSeparator)
 						throw Exceptions.BadToken(reader, token, JsonToken.ValueSeparator);
 				}

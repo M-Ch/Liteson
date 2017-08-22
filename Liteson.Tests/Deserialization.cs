@@ -152,7 +152,30 @@ namespace Liteson.Tests
 			JsonConvert.Deserialize<Foo>(input).ShouldBeEquivalentTo(expected);
 		}
 
-		//[Fact] run in release mode
+		private class WithStructClass
+		{
+			public int Value { get; set; }
+			public StructType Struct { get; set; }
+		}
+
+		[Fact]
+		public void StructFromNull() => Assert.Throws<JsonException>(() => JsonConvert.Deserialize<StructType>("null"));
+
+		[Fact]
+		public void Struct() => JsonConvert.Deserialize<StructType>(@"{""Value"":20, ""Value2"": 30}").ShouldBeEquivalentTo(new StructType { Value = 20, Value2 = 30 });
+
+		[Fact]
+		public void WithStruct()
+		{
+			var expected = new WithStructClass
+			{
+				Value = 10,
+				Struct = new StructType { Value = 20, Value2 = 30 }
+			};
+			JsonConvert.Deserialize<WithStructClass>(@"{""Value"":10, ""Struct"":{""Value"":20, ""Value2"": 30}}").ShouldBeEquivalentTo(expected);
+		}
+
+		//[Fact] //run in release mode
 		public void Performance()
 		{
 			var expected = new Foo

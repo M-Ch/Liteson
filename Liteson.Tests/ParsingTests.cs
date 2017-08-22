@@ -38,7 +38,7 @@ namespace Liteson.Tests
 		[InlineData("-11474836490")]
 		public void Overflows(string input) => Parsing.TryParseBase10Int(input, 0, input.Length, out var _).Should().BeFalse();
 
-		[Fact]
+		//[Fact]
 		public void Performance()
 		{
 			var sw = new Stopwatch();

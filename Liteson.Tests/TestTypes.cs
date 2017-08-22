@@ -23,4 +23,10 @@ namespace Liteson.Tests
 		public byte[] Bytes { get; set; }
 		public string String { get; set; }
 	}
+
+	public struct StructType
+	{
+		public int Value { get; set; }
+		public int Value2 { get; set; }
+	}
 }

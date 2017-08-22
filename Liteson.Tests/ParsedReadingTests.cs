@@ -40,7 +40,7 @@ namespace Liteson.Tests
 		[MemberData(nameof(DecimalsSource))]
 		public void Decimals(string input, decimal expected) => ParsedReading.ReadDecimal(new JsonReader(input)).ShouldBeEquivalentTo(expected);
 
-		public static IEnumerable<object[]> DecimalsSource()
+		private static IEnumerable<object[]> DecimalsSource()
 		{
 			yield return new object[] {"1", 1m};
 			yield return new object[] {"1.0", 1.0m};

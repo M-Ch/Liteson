@@ -80,7 +80,18 @@ namespace Liteson.Tests
 				UShort = 15340
 			};
 			JsonConvert.Serialize(data).ShouldBeEquivalentTo(Newton.SerializeObject(data));
-	}
+		}
+
+		[Fact]
+		public void StructType()
+		{
+			var data = new StructType
+			{
+				Value =  100,
+				Value2 = 200
+			};
+			JsonConvert.Serialize(data).ShouldBeEquivalentTo(@"{""Value"":100,""Value2"":200}");
+		}
 
 		private class GameData
 		{

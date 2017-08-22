@@ -91,7 +91,7 @@ namespace Liteson.Tests
 			Assert.Throws<JsonException>(() => reader.Read());
 		}
 
-		private IEnumerable<(JsonToken token, string buffer)> ReadTokens(string input)
+		private static IEnumerable<(JsonToken token, string buffer)> ReadTokens(string input)
 		{
 			var reader = new JsonReader(input);
 			while (!reader.IsAtEnd())

@@ -33,6 +33,10 @@ namespace Liteson
 				return buffer;
 			if (token.HasFlag(JsonToken.Number))
 				return part.Text.Substring(part.Start, part.Length);
+			if (token == JsonToken.True)
+				return "true";
+			if (token == JsonToken.False)
+				return "false";
 
 			throw Exceptions.BadFormat(reader, "string value");
 		}

@@ -115,6 +115,21 @@ namespace Liteson.Tests
 			JsonConvert.Deserialize<BasicTypesBag>(input).ShouldBeEquivalentTo(expected);
 		}
 
+		private class ImplicitStringClass
+		{
+			public string FromNumber { get; set; }
+			public string FromBool { get; set; }
+		}
+
+		[Fact]
+		public void ImplicitString() => JsonConvert
+			.Deserialize<ImplicitStringClass>("{\"FromNumber\": 12, \"FromBool\": true}")
+			.ShouldBeEquivalentTo(new ImplicitStringClass
+			{
+				FromBool = "true",
+				FromNumber = "12"
+			});
+
 		[Fact]
 		public void ComplexType()
 		{

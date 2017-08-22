@@ -66,6 +66,8 @@ namespace Liteson.Tests
 		[InlineData("True")]
 		[InlineData("False")]
 		[InlineData("Null")]
+		[InlineData("--")]
+		[InlineData("+1")]
 		[InlineData("foo")]
 		[InlineData("fals")]
 		[InlineData("truE")]

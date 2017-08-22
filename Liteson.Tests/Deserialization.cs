@@ -130,6 +130,12 @@ namespace Liteson.Tests
 				FromNumber = "12"
 			});
 
+		[Theory]
+		[InlineData("true"), InlineData("[]"), InlineData("[{\"foo\": [1,2,3]  }]")]
+		public void UnknownProperties(string propertyValue) => JsonConvert
+			.Deserialize<BasicTypesBag>($"{{\"unknown\": {propertyValue}, \"Bool\": true}}")
+			.ShouldBeEquivalentTo(new BasicTypesBag { Bool = true });
+
 		[Fact]
 		public void ComplexType()
 		{

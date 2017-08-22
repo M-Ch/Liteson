@@ -76,6 +76,7 @@
     <Compile Include="Serialization.cs" />
     <Compile Include="TestHelpers.cs" />
     <Compile Include="TestTypes.cs" />
+    <Compile Include="ValueSkipperTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

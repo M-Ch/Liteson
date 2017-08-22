@@ -49,15 +49,14 @@ namespace Liteson
 						throw Exceptions.BadToken(reader, token, JsonToken.String);
 
 					var hasProperty = properties.TryGetValue(propertyName, out var property);
-					if (!hasProperty)
-						throw new NotImplementedException("todo: proerty skipping");
-
 					token = reader.Read(ref bufferPart, out var _);
 					if (token != JsonToken.NameSeparator)
 						throw Exceptions.BadToken(reader, token, JsonToken.NameSeparator);
 
-					var propertyValue = property.Descriptor.Reader(reader);
-					property.Setter(value, propertyValue);
+					if(hasProperty)
+						property.Setter(value, property.Descriptor.Reader(reader));
+					else
+						ValueSkipper.SkipNext(reader);
 
 					token = reader.Read(ref bufferPart, out var _);
 					if (token == JsonToken.ObjectEnd)

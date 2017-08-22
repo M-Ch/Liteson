@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Liteson
 {
+	[DebuggerTypeProxy(typeof(DebuggerProxy))]
 	internal class JsonReader
 	{
 		private static readonly bool[] Whitespace = new bool[' ' + 1];
@@ -207,6 +209,32 @@ namespace Liteson
 				var current = _buffer.Read();
 				if (expected[a] != current)
 					throw new JsonException($"Expected '{expected}' near line {_buffer.Line}, column {_buffer.Column}, got '{current}' instead.");
+			}
+		}
+
+		private class DebuggerProxy
+		{
+			private readonly JsonReader _reader;
+			public DebuggerProxy(JsonReader reader) => _reader = reader;
+
+			public string Previous => SafeSubstring(_reader._buffer, - 8, 7);
+			public string Incoming => SafeSubstring(_reader._buffer, 0, 20);
+			public string Nearest => SafeSubstring(_reader._buffer, -10, 10)+"→"+Current+"←"+SafeSubstring(_reader._buffer, 1, 10);
+			public string Whole => _reader._buffer.Text;
+			public char Current => _reader._buffer.Text[_reader._buffer.Position];
+
+			private static string SafeSubstring(StringBuffer buffer, int offset, int length)
+			{
+				var from = buffer.Position + offset;
+				var text = buffer.Text;
+				if (from < 0)
+				{
+					from = 0;
+					length += from;
+				}
+				if (length > text.Length - from)
+					length = text.Length - from;
+				return text.Substring(from, length);
 			}
 		}
 	}

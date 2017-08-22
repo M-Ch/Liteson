@@ -41,6 +41,16 @@ namespace Liteson.Tests
 		public void TokenSequences(string input, int[] expected)
 			=> ReadTokens(input).ShouldBeEquivalentTo(expected.Select(i => ((JsonToken) i, (string) null)));
 
+		[Fact]
+		public void SimpleObject() => ReadTokens(@"{""value"": 12}").ShouldBeEquivalentTo(new[]
+		{
+			(JsonToken.ObjectStart, (string)null),
+			(JsonToken.String, "value"),
+			(JsonToken.NameSeparator, null),
+			(JsonToken.Number, "12"),
+			(JsonToken.ObjectEnd, null)
+		});
+
 		[Theory]
 		[InlineData("abc", "abc")]
 		[InlineData("a b", "a b")]

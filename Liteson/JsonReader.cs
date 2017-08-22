@@ -47,12 +47,12 @@ namespace Liteson
 
 		public JsonToken Read(ref BufferPart bufferPart, out string buffer)
 		{
+			SkipWhitespace();
 			bufferPart.Text = _buffer.Text;
 			bufferPart.Start = _buffer.Position;
 			bufferPart.Length = -1;
 			buffer = null;
 
-			SkipWhitespace();
 			var current = _buffer.Peek();
 			if (current  == '\uffff')
 				return JsonToken.End;

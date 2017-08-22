@@ -8,6 +8,7 @@ namespace Liteson
 	{
 		private Dictionary<Type, TypeDescriptor> _descriptors = new List<TypeDescriptor>
 		{
+			ForPrimitive<bool>((v, c) => c.Writer.Write((bool) v), r => ParsedReading.ReadBool(r)),
 			ForPrimitive<byte>((v, c) => c.Writer.Write((byte) v), r => ParsedReading.ReadByte(r)),
 			ForPrimitive<sbyte>((v, c) => c.Writer.Write((sbyte) v), r => ParsedReading.ReadSByte(r)),
 			ForPrimitive<char>((v, c) => c.Writer.Write((char) v), r => ParsedReading.ReadChar(r)),

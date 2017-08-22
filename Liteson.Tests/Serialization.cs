@@ -55,6 +55,33 @@ namespace Liteson.Tests
 			JsonConvert.Serialize(data).ShouldBeEquivalentTo(Newton.SerializeObject(data));
 		}
 
+		[Fact]
+		public void BasicTypes()
+		{
+			var data = new BasicTypesBag
+			{
+				Bool = true,
+				Byte = 100,
+				Bytes = new byte[] { 1,2,60 },
+				Char = '鬱',
+				DateTime = DateTime.Parse("2017-08-20 20:34:56"),
+				Decimal = 23567890.56m,
+				Double = 234.56546342,
+				Float = 65.2344f,
+				Guid = Guid.NewGuid(),
+				Int = 55232,
+				Long = 63465463456345634,
+				SByte = -120,
+				Short = 4231,
+				String = "lorem ipsum",
+				TimeSpan = TimeSpan.FromMinutes(43),
+				UInt = 2323423423,
+				ULong = 2345234232345423452,
+				UShort = 15340
+			};
+			JsonConvert.Serialize(data).ShouldBeEquivalentTo(Newton.SerializeObject(data));
+	}
+
 		private class GameData
 		{
 			public int Id { get; set; }

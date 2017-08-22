@@ -96,6 +96,38 @@ namespace Liteson
 		public static TimeSpan ReadTimeSpan(JsonReader reader) => ParseString(reader, i => TimeSpan.TryParse(i, out var result) ? result : default(TimeSpan?));
 		public static byte[] ReadByteArray(JsonReader reader) => ParseString(reader, Convert.FromBase64String);
 
+		public static bool ReadBool(JsonReader reader)
+		{
+			var part = new BufferPart();
+			var token = reader.Read(ref part, out var buffer);
+			if (token == JsonToken.True)
+				return true;
+			if (token == JsonToken.False)
+				return false;
+			if (token.HasFlag(JsonToken.Number))
+			{
+				if (part.Length == 1)
+					return part.Text[part.Start] != '0';
+				var text = part.Text.Substring(part.Start, part.Length);
+				if(token.HasFlag(JsonToken.NumberFloat))
+					return double.TryParse(text, Base10WithExponent, CultureInfo.InvariantCulture, out var value) 
+						? value != 0
+						: throw Exceptions.BadFormat(reader, "double value");
+				return long.TryParse(text, out var result) ? result != 0 : throw Exceptions.BadFormat(reader, "numeric value");
+			}
+			if (token == JsonToken.String)
+				try
+				{
+					return Convert.ToBoolean(buffer, CultureInfo.InvariantCulture);
+				}
+				catch (FormatException)
+				{
+					throw Exceptions.BadFormat(reader, "bool value");
+				}
+
+			throw Exceptions.BadToken(reader, token, JsonToken.False | JsonToken.True);
+		}
+
 		private static T ParseNumber<T>(JsonReader reader, Func<string, T?> parser) where T : struct
 		{
 			var part = new BufferPart();

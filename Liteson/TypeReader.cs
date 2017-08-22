@@ -43,6 +43,8 @@ namespace Liteson
 				while (true)
 				{
 					token = reader.Read(ref bufferPart, out var propertyName);
+					if (token == JsonToken.ObjectEnd)
+						return value;
 					if (token != JsonToken.String)
 						throw Exceptions.BadToken(reader, token, JsonToken.String);
 

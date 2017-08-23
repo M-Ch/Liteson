@@ -82,6 +82,19 @@ namespace Liteson
 			{
 				var box = (Box<TTarget>)i;
 				bound(ref box.Value, (TParam)p);
+				box.InvalidateWrapper();
+			};
+		}
+
+		public static Action<object, object> BuildFieldSetter(FieldInfo field)
+		{
+			if (field.DeclaringType.IsClass)
+				return field.SetValue;
+
+			return (target, value) =>
+			{
+				var box = (IBox) target;
+				field.SetValue(box.Value, value);
 			};
 		}
 
@@ -123,6 +136,9 @@ namespace Liteson
 	internal class Box<T> : IBox where T : struct
 	{
 		public T Value;
-		object IBox.Value => Value;
+		private object _box;
+
+		public void InvalidateWrapper() => _box = null;
+		object IBox.Value => _box ?? (_box = Value);
 	}
 }

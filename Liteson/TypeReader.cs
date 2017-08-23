@@ -67,20 +67,28 @@ namespace Liteson
 
 		private static Func<JsonReader, object> ForComplex(Type type, Func<Type, TypeDescriptor> descriptorSource)
 		{
+			if(type.IsClass && type.GetConstructor(Array.Empty<Type>()) == null)
+				return reader => throw new JsonException($"Type {type} must define public parameterless constructor.");
+
 			var properties = type
-				.GetRuntimeProperties()
+				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
 				.Where(i => i.SetMethod != null && i.GetMethod != null)
-				.Select(i => new {Property = i, Setter = ReflectionUtils.BuildSetter(i), Descriptor = descriptorSource(i.PropertyType)})
+				.Select(i => new {Property = (MemberInfo)i, Setter = ReflectionUtils.BuildSetter(i), Descriptor = descriptorSource(i.PropertyType)});
+
+			var fields = type
+				.GetFields(BindingFlags.Instance | BindingFlags.Public)
+				.Select(i => new {Property = (MemberInfo)i, Setter = ReflectionUtils.BuildFieldSetter(i), Descriptor = descriptorSource(i.FieldType)});
+
+			var all = properties
+				.Concat(fields)
 				.SelectMany(i => JsonNames(i.Property).Select(j => new {Name = j, i.Setter, i.Descriptor}))
 				.GroupBy(i => i.Name)
 				.ToDictionary(i => i.Key, i => i.First());
 
-			if (type.IsClass && type.GetConstructor(Array.Empty<Type>()) == null)
-				return reader => throw new JsonException($"Type {type} must define public parameterless constructor.");
-
 			var constructor = type.IsClass
 				? ReflectionUtils.BuildConstructor(type)
 				: () => Activator.CreateInstance(typeof(Box<>).MakeGenericType(type));
+
 			var unwrapper = !type.IsClass
 				? new Func<object, object>(i => ((IBox) i).Value)
 				: null;
@@ -102,7 +110,7 @@ namespace Liteson
 					if (token != JsonToken.String)
 						throw Exceptions.BadToken(reader, token, JsonToken.String);
 
-					var hasProperty = properties.TryGetValue(propertyName, out var property);
+					var hasProperty = all.TryGetValue(propertyName, out var property);
 					token = reader.Read(ref bufferPart, out var _);
 					if (token != JsonToken.NameSeparator)
 						throw Exceptions.BadToken(reader, token, JsonToken.NameSeparator);
@@ -121,7 +129,7 @@ namespace Liteson
 			};
 		}
 
-		private static IEnumerable<string> JsonNames(PropertyInfo property)
+		private static IEnumerable<string> JsonNames(MemberInfo property)
 		{
 			yield return property.Name;
 			yield return property.Name.ToLower();

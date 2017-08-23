@@ -39,9 +39,12 @@ namespace Liteson
 		private static IEnumerable<Action<object, SerializationContext>> ForComplex(Type root, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			var properties = root
-				.GetRuntimeProperties()
+				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
 				.Where(i => i.GetMethod != null)
 				.ToList();
+
+			var fields = root.GetFields(BindingFlags.Instance | BindingFlags.Public).ToList();
+
 
 			yield return (o, context) =>
 			{
@@ -51,21 +54,26 @@ namespace Liteson
 			};
 
 			var it = 0;
-			foreach(var property in properties)
+			var all = properties
+				.Select(i => new {i.Name, Getter = ReflectionUtils.BuildGetter(i), ReturnType = i.PropertyType})
+				.Concat(fields.Select(i => new {i.Name, Getter = new Func<object, object>(i.GetValue), ReturnType = i.FieldType}));
+
+			foreach(var item in all)
 			{
-				var subDescriptor = descriptorSource(property.PropertyType);
+				var subDescriptor = descriptorSource(item.ReturnType);
 				if (it++ > 0)
 					yield return (obj, context) => context.Writer.NextObjectProperty();
 
-				var getter = ReflectionUtils.BuildGetter(property);
+				var getter = item.Getter;
 				yield return (obj, context) =>
 				{
 					var writer = context.Writer;
-					writer.PropertyName(property.Name);
+					writer.PropertyName(item.Name);
 					var value = getter(obj);
 					ObjectWriter.Write(value, context, subDescriptor.SerializationPlan);
 				};
 			}
+
 
 			yield return (o, context) => context.Writer.EndObject();
 		}

@@ -83,6 +83,9 @@ namespace Liteson.Tests
 		}
 
 		[Fact]
+		public void Tuple() => JsonConvert.Serialize((a: 1, b: 2, c: 3)).ShouldBeEquivalentTo("{\"Item1\":1,\"Item2\":2,\"Item3\":3}");
+
+		[Fact]
 		public void StructType()
 		{
 			var data = new StructType
@@ -92,6 +95,24 @@ namespace Liteson.Tests
 			};
 			JsonConvert.Serialize(data).ShouldBeEquivalentTo(@"{""Value"":100,""Value2"":200}");
 		}
+
+		private class PrivateDataClass
+		{
+			public int Value { get; set; }
+			private int _int = 10;
+			private string Foo { get; set; } = "foo";
+			private static bool _static = true;
+			private static string BarStatic { get; set; } = "bar";
+		}
+
+		[Fact]
+		public void PrivatePartsNotTouched() => JsonConvert.Serialize(new PrivateDataClass {Value = 5}).ShouldBeEquivalentTo("{\"Value\":5}");
+
+		[Fact]
+		public void PublicFields() => JsonConvert
+			.Serialize(new PublicFields { A = true, B = 6, C = 'g' })
+			.ShouldBeEquivalentTo("{\"A\":true,\"B\":6,\"C\":\"g\"}");
+
 
 		private class GameData
 		{

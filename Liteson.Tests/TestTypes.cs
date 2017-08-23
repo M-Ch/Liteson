@@ -42,4 +42,11 @@ namespace Liteson.Tests
 		public int Value { get; set; }
 		public IReadOnlyList<SimplePoco> Items { get; set; }
 	}
+
+	public class PublicFields
+	{
+		public bool A;
+		public int B;
+		public char C;
+	}
 }

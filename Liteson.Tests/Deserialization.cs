@@ -175,6 +175,23 @@ namespace Liteson.Tests
 			JsonConvert.Deserialize<WithStructClass>(@"{""Value"":10, ""Struct"":{""Value"":20, ""Value2"": 30}}").ShouldBeEquivalentTo(expected);
 		}
 
+		[Fact]
+		public void PublicFields() => JsonConvert
+			.Deserialize<PublicFields>("{\"A\":true,\"B\":6,\"C\":\"g\"}")
+			.ShouldBeEquivalentTo(new PublicFields {A = true, B = 6, C = 'g'});
+
+		[Fact]
+		public void Tuple() => JsonConvert.Deserialize<(int, int)>("{\"Item1\":1,\"Item2\":2}").ShouldBeEquivalentTo((1, 2));
+
+		[Fact]
+		public void StructWithFieldAndProperty() => JsonConvert.Deserialize<FieldsAndProperties>("{\"A\":1,\"B\":2}").ShouldBeEquivalentTo(new FieldsAndProperties { A = 1, B = 2 });
+
+		private struct FieldsAndProperties
+		{
+			public int A { get; set; }
+			public int B;
+		}
+
 		//[Fact] //run in release mode
 		public void Performance()
 		{
@@ -187,13 +204,13 @@ namespace Liteson.Tests
 					Time = TimeSpan.FromHours(2.5)
 				}
 			};
-			var input = Newtonsoft.Json.JsonConvert.SerializeObject(expected);
+			var input = Newton.SerializeObject(expected);
 
 			var sw = new Stopwatch();
 			const int it = 500000;
 			sw.Start();
 			for(var a = 0; a < it; a++)
-				Newtonsoft.Json.JsonConvert.DeserializeObject<Foo>(input);
+				Newton.DeserializeObject<Foo>(input);
 			var e1 = sw.Elapsed;
 			sw.Restart();
 			for(var a = 0; a < it; a++)

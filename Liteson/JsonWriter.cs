@@ -13,6 +13,7 @@ namespace Liteson
 		private static readonly CultureInfo InvariantCulture = CultureInfo.InvariantCulture;
 		private static readonly string[] Unescapes = new string['\\'+1];
 		private int _arrayItemCount;
+		private byte[] _buffer = new byte[20];
 
 		static JsonWriter()
 		{
@@ -87,7 +88,7 @@ namespace Liteson
 		public void Write(sbyte value) => _target.Write(value);
 		public void Write(short value) => _target.Write(value);
 		public void Write(ushort value) => _target.Write(value);
-		public void Write(int value) => Formatting.WriteFast(value, _target);
+		public void Write(int value) => Formatting.WriteFast(value, _target, _buffer);
 		public void Write(uint value) => _target.Write(value);
 		public void Write(long value) => _target.Write(value);
 		public void Write(ulong value) => _target.Write(value);
@@ -98,7 +99,7 @@ namespace Liteson
 		public void Write(DateTime dateTime)
 		{
 			_target.Write('"');
-			Formatting.WriteIsoFormatFast(dateTime, _target);
+			Formatting.WriteIsoFormatFast(dateTime, _target, _buffer);
 			_target.Write('"');
 		}
 

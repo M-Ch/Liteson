@@ -8,7 +8,6 @@ namespace Liteson.Tests
 	public class ParsingTests
 	{
 		private readonly ITestOutputHelper _output;
-
 		public ParsingTests(ITestOutputHelper output) => _output = output;
 
 		[Theory]

@@ -6,10 +6,10 @@ namespace Liteson
 {
 	internal static class Formatting
 	{
-		public static void WriteIsoFormatFast(DateTime dateTime, StringWriter writer)
+		public static void WriteIsoFormatFast(DateTime dateTime, StringWriter writer, byte[] buffer)
 		{
 			GetDatePart(dateTime.Ticks, out var year, out var month, out var day);
-			WriteFast(year, writer);
+			WriteFast(year, writer, buffer);
 			writer.Write('-');
 			WriteDatePartFast(month, writer);
 			writer.Write('-');
@@ -24,7 +24,7 @@ namespace Liteson
 			if (ms > 0)
 			{
 				writer.Write('.');
-				WriteFast(ms, writer);
+				WriteFast(ms, writer, buffer);
 			}
 			if (dateTime.Kind == DateTimeKind.Utc)
 				writer.Write('Z');
@@ -39,45 +39,25 @@ namespace Liteson
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void WriteFast(int value, TextWriter target)
+		public static void WriteFast(int value, TextWriter target, byte[] buffer)
 		{
+			if (value == 0)
+			{
+				target.Write('0');
+				return;
+			}
 			if (value < 0)
-			{
 				target.Write('-');
-				value *= -1;
-			}
-			int div;
-			for (div = 1; div <= value; div *= 10)
+
+			var length = 0;
+			while (value != 0)
 			{
+				buffer[length++] = (byte)(value > 0 ? value % 10 : -(value % 10));
+				value /= 10;
 			}
 
-			do
-			{
-				div /= 10;
-				target.Write((char)('0' + (value / div)));
-				value %= div;
-			} while(value > 0);
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void WriteFast(long value, TextWriter target)
-		{
-			if(value < 0)
-			{
-				target.Write('-');
-				value *= -1;
-			}
-			long div;
-			for(div = 1; div <= value; div *= 10)
-			{
-			}
-
-			do
-			{
-				div /= 10;
-				target.Write((char)('0' + (value / div)));
-				value %= div;
-			} while(value > 0);
+			for (var a = length - 1; a >= 0; a--)
+				target.Write((char)('0' + buffer[a]));
 		}
 
 		//works good up to 99

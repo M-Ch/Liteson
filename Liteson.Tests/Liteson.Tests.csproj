@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="Base64EncodingTests.cs" />
     <Compile Include="Deserialization.cs" />
+    <Compile Include="FormattingTests.cs" />
     <Compile Include="JsonReaderTests.cs" />
     <Compile Include="JsonWriter\Formatting.cs" />
     <Compile Include="JsonWriter\NoIndenting.cs" />

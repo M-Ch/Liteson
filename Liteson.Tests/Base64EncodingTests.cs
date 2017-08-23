@@ -26,7 +26,7 @@ namespace Liteson.Tests
 		public void EmptyArray() => Array.Empty<byte>().ToBase64().ShouldBeEquivalentTo(Convert.ToBase64String(Array.Empty<byte>()));
 
 		[Fact]
-		public void Null() => Assert.Throws<ArgumentNullException>(() => Base64.Write(new StringWriter(), null));
+		public void Null() => Assert.Throws<ArgumentNullException>(() => Base64.Write(new StringWriter(), null, new byte[20]));
 
 		[Fact]
 		public void IncompleteBlockOneByte()
@@ -56,7 +56,7 @@ namespace Liteson.Tests
 		public static string ToBase64(this byte[] data)
 		{
 			var sw = new StringWriter();
-			Base64.Write(sw, data);
+			Base64.Write(sw, data, new byte[20]);
 			return sw.ToString();
 		}
 	}

@@ -10,12 +10,9 @@ namespace Liteson
 	{
 		private static readonly TypeInfo EnumerableType = typeof(IEnumerable).GetTypeInfo();
 
-		public static Func<JsonReader, object> ForType(Type type, Func<Type, TypeDescriptor> descriptorSource)
-		{
-			return EnumerableType.IsAssignableFrom(type.GetTypeInfo())
-				? ForCollection(type, descriptorSource)
-				: ForComplex(type, descriptorSource);
-		}
+		public static Func<JsonReader, object> ForType(Type type, Func<Type, TypeDescriptor> descriptorSource) => EnumerableType.IsAssignableFrom(type.GetTypeInfo())
+			? ForCollection(type, descriptorSource)
+			: ForComplex(type, descriptorSource);
 
 		private static Func<JsonReader, object> ForCollection(Type type, Func<Type, TypeDescriptor> descriptorSource)
 		{

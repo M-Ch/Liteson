@@ -6,7 +6,7 @@ namespace Liteson
 {
 	internal static class Formatting
 	{
-		public static void WriteIsoFormatFast(DateTime dateTime, StringWriter writer, byte[] buffer)
+		public static void WriteIsoFormatFast(DateTime dateTime, TextWriter writer, byte[] buffer)
 		{
 			GetDatePart(dateTime.Ticks, out var year, out var month, out var day);
 			WriteFast(year, writer, buffer);

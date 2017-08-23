@@ -14,7 +14,7 @@ namespace Liteson
 			'0','1','2','3','4','5','6','7','8','9','+','/','='
 		};
 
-		public static void Write(StringWriter target, byte[] data)
+		public static void Write(TextWriter target, byte[] data, byte[] buffer)
 		{
 			if (data == null)
 				throw new ArgumentNullException(nameof(data));
@@ -33,15 +33,14 @@ namespace Liteson
 			var remaining = data.Length % blockSize;
 			if (remaining == 0)
 				return;
-
-			var lastBlock = new byte[blockSize];
-			Array.Copy(data, blockCount * blockSize, lastBlock, 0, remaining);
-			target.Write(Lookup[lastBlock[0] >> 2]);
+			//handcrafted last block:
+			Array.Copy(data, blockCount * blockSize, buffer, 0, remaining);
+			target.Write(Lookup[buffer[0] >> 2]);
 			if (remaining >= 1)
 			{
-				target.Write(Lookup[(lastBlock[0] & 0b0000_0011) << 4 | (lastBlock[1] >> 4)]);
+				target.Write(Lookup[(buffer[0] & 0b0000_0011) << 4 | (buffer[1] >> 4)]);
 				if(remaining == 2)
-					target.Write(Lookup[(lastBlock[1] & 0b0000_1111) << 2 | lastBlock[2] >> 6]);
+					target.Write(Lookup[(buffer[1] & 0b0000_1111) << 2 | buffer[2] >> 6]);
 			}
 
 			target.Write(remaining == 1 ? "==" : "=");

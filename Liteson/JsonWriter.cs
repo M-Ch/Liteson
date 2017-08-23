@@ -6,14 +6,14 @@ namespace Liteson
 {
 	internal class JsonWriter
 	{
-		private readonly StringWriter _target;
+		private readonly TextWriter _target;
 		private int _depth;
 		private readonly string _newLine;
 		private readonly string _tab;
 		private static readonly CultureInfo InvariantCulture = CultureInfo.InvariantCulture;
 		private static readonly string[] Unescapes = new string['\\'+1];
 		private int _arrayItemCount;
-		private byte[] _buffer = new byte[20];
+		private readonly byte[] _buffer = new byte[20];
 
 		static JsonWriter()
 		{
@@ -26,7 +26,7 @@ namespace Liteson
 			Unescapes['\t'] = @"\t";
 		}
 
-		public JsonWriter(StringWriter target, WriterSettings settings)
+		public JsonWriter(TextWriter target, WriterSettings settings)
 		{
 			_target = target;
 			_tab = settings.Tab;
@@ -84,10 +84,10 @@ namespace Liteson
 
 		public void WriteNull() => _target.Write("null");
 		public void Write(bool value) => _target.Write(value ? "true" : "false");
-		public void Write(byte value) => _target.Write(value);
-		public void Write(sbyte value) => _target.Write(value);
-		public void Write(short value) => _target.Write(value);
-		public void Write(ushort value) => _target.Write(value);
+		public void Write(byte value) => Formatting.WriteFast(value, _target, _buffer);
+		public void Write(sbyte value) => Formatting.WriteFast(value, _target, _buffer);
+		public void Write(short value) => Formatting.WriteFast(value, _target, _buffer);
+		public void Write(ushort value) => Formatting.WriteFast(value, _target, _buffer);
 		public void Write(int value) => Formatting.WriteFast(value, _target, _buffer);
 		public void Write(uint value) => _target.Write(value);
 		public void Write(long value) => _target.Write(value);
@@ -120,7 +120,7 @@ namespace Liteson
 		public void Write(byte[] value)
 		{
 			_target.Write('"');
-			Base64.Write(_target, value);
+			Base64.Write(_target, value, _buffer);
 			_target.Write('"');
 		}
 

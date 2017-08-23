@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Liteson.Tests
 {
@@ -28,5 +29,17 @@ namespace Liteson.Tests
 	{
 		public int Value { get; set; }
 		public int Value2 { get; set; }
+	}
+
+	public class SimplePoco
+	{
+		public bool IsImportant { get; set; }
+		public string Value { get; set; }
+	}
+
+	public class WithList
+	{
+		public int Value { get; set; }
+		public IReadOnlyList<SimplePoco> Items { get; set; }
 	}
 }

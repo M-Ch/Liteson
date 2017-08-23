@@ -47,6 +47,31 @@ namespace Liteson
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static bool IsWhitespace(char value) => value <= ' ' && Whitespace[value];
 
+		public JsonToken PeekToken()
+		{
+			SkipWhitespace();
+			var current = _buffer.Peek();
+
+			switch(current)
+			{
+				case 't': return JsonToken.True;
+				case 'f': return JsonToken.False;
+				case 'n': return JsonToken.Null;
+				case '"': return JsonToken.String;
+				case '[': return JsonToken.ArrayStart;
+				case ']': return JsonToken.ArrayEnd;
+				case '{': return JsonToken.ObjectStart;
+				case '}': return JsonToken.ObjectEnd;
+				case ':': return JsonToken.NameSeparator;
+				case ',': return JsonToken.ValueSeparator;
+				case '\uffff': return JsonToken.End;
+				default:
+					if(current == '-' || (current >= '0' && current <= '9'))
+						return JsonToken.Number;
+					throw new JsonException($"Unexpected token '{current}' at line {_buffer.Line}, column {_buffer.Column}.");
+			}
+		}
+
 		public JsonToken Read(ref BufferPart bufferPart, out string buffer)
 		{
 			SkipWhitespace();

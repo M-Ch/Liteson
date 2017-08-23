@@ -9,8 +9,6 @@ namespace Liteson
 	internal class SerializationPlan
 	{
 		public IReadOnlyList<Action<object, SerializationContext>> Steps { get; set; }
-
-		private static readonly Type GenericEnumerableType = typeof(IEnumerable<>);
 		private static readonly TypeInfo EnumerableType = typeof(IEnumerable).GetTypeInfo();
 
 		public static SerializationPlan ForType(Type type, Func<Type, TypeDescriptor> descriptorSource) => new SerializationPlan
@@ -22,10 +20,7 @@ namespace Liteson
 
 		private static Action<object, SerializationContext> ForCollection(Type root, Func<Type, TypeDescriptor> descriptorSource)
 		{
-			var interfaces = root.GetTypeInfo().ImplementedInterfaces.Select(i => i.GetTypeInfo()).ToList();
-			var genericEnumerable = interfaces.FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == GenericEnumerableType);
-
-			var elementType = genericEnumerable?.GenericTypeArguments[0] ?? typeof(object);
+			var elementType = ReflectionUtils.FindCollectionElementType(root);
 			var descriptor = descriptorSource(elementType);
 
 			return (obj, context) =>

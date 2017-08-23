@@ -13,8 +13,56 @@ namespace Liteson
 		public static Func<JsonReader, object> ForType(Type type, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			return EnumerableType.IsAssignableFrom(type.GetTypeInfo())
-				? throw new NotImplementedException("collections to do")
+				? ForCollection(type, descriptorSource)
 				: ForComplex(type, descriptorSource);
+		}
+
+		private static Func<JsonReader, object> ForCollection(Type type, Func<Type, TypeDescriptor> descriptorSource)
+		{
+			var element = ReflectionUtils.FindCollectionElementType(type);
+			var constructor = ReflectionUtils.BuildConstructor(typeof(List<>).MakeGenericType(element));
+			var elementDescriptor = descriptorSource(element);
+
+			return reader =>
+			{
+				var bufferPart = new BufferPart();
+				var token = reader.Read(ref bufferPart, out var _);
+				if (token == JsonToken.Null)
+					return null;
+				var target = (IList) constructor();
+				if(token != JsonToken.ArrayStart)
+					throw Exceptions.BadToken(reader, token, JsonToken.ObjectStart);
+
+				var finalizer = type.IsArray
+					? new Func<IList, object>(i =>
+					{
+						var array = Array.CreateInstance(element, i.Count);
+						i.CopyTo(array, 0);
+						return array;
+					})
+					: null;
+
+				var isFirst = true;
+				while (true)
+				{
+					if (reader.PeekToken() == JsonToken.ArrayEnd)
+					{
+						reader.Read(ref bufferPart, out var _);
+						return finalizer != null ? finalizer(target) : target;
+					}
+					if (!isFirst)
+					{
+						token = reader.Read(ref bufferPart, out var _);
+						if (token != JsonToken.ValueSeparator)
+							throw Exceptions.BadToken(reader, token, JsonToken.ValueSeparator);
+					}
+
+					var item = elementDescriptor.Reader(reader);
+					target.Add(item);
+
+					isFirst = false;
+				}
+			};
 		}
 
 		private static Func<JsonReader, object> ForComplex(Type type, Func<Type, TypeDescriptor> descriptorSource)
@@ -28,7 +76,7 @@ namespace Liteson
 				.ToDictionary(i => i.Key, i => i.First());
 
 			if (type.IsClass && type.GetConstructor(Array.Empty<Type>()) == null)
-				throw new JsonException($"Type {type} must define public parameterless constructor.");
+				return reader => throw new JsonException($"Type {type} must define public parameterless constructor.");
 
 			var constructor = type.IsClass
 				? ReflectionUtils.BuildConstructor(type)

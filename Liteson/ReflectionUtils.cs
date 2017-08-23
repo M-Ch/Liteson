@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -14,6 +16,8 @@ namespace Liteson
 		private static readonly MethodInfo ParametrizedActionClassInfo = GetMethod(nameof(BuildParametrizedActionClass));
 		private static readonly MethodInfo ParametrizedActionStructInfo = GetMethod(nameof(BuildParametrizedActionStruct));
 		private static readonly MethodInfo BuildConstructorInfo = GetMethod(nameof(BuildConstructorFunc));
+		private static readonly Type GenericEnumerableType = typeof(IEnumerable<>);
+		private static readonly Type ObjectType = typeof(object);
 
 		private delegate TResult RefFunc<TTarget, TResult>(ref TTarget target);
 		private delegate void RefAction<TTarget, TParam>(ref TTarget target, TParam parameter);
@@ -22,6 +26,14 @@ namespace Liteson
 		{
 			var genericBuild = BuildConstructorInfo.MakeGenericMethod(type);
 			return (Func<object>)genericBuild.Invoke(null, Array.Empty<object>());
+		}
+
+		public static Type FindCollectionElementType(Type enumerableType)
+		{
+			var interfaces = enumerableType.GetTypeInfo().ImplementedInterfaces.Select(i => i.GetTypeInfo()).ToList();
+			var genericEnumerable = new[] { enumerableType }.Concat(interfaces).FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == GenericEnumerableType);
+
+			return genericEnumerable?.GenericTypeArguments[0] ?? ObjectType;
 		}
 
 		public static Func<object, object> BuildGetter(PropertyInfo property)
@@ -76,12 +88,30 @@ namespace Liteson
 		public static Func<object> BuildConstructorFunc<T>()
 		{
 			var type = typeof(T);
-			var method = new DynamicMethod("$Ctor" + type.Name + type.GetHashCode(), type, null, type);
+			var method = new DynamicMethod("$Ctor" + type, type, null, type);
 			var generator = method.GetILGenerator();
-			generator.Emit(OpCodes.Newobj, type.GetConstructor(Type.EmptyTypes));
+			var constructor = type.GetConstructor(Type.EmptyTypes);
+			generator.Emit(OpCodes.Newobj, constructor);
 			generator.Emit(OpCodes.Ret);
 			var func = (Func<T>)method.CreateDelegate(typeof(Func<T>));
-			return () => func();
+			Func<object> fallback = null;
+			return () =>
+			{
+				try
+				{
+					return fallback == null ? func() : fallback();
+				}
+				catch(MethodAccessException) //it can happen especially when using very nested generic types etc.
+				{
+					lock (method)
+					{
+						if (fallback != null)
+							throw;
+						fallback = () => constructor.Invoke(Array.Empty<object>());
+					}
+					return fallback();
+				}
+			};
 		}
 	}
 

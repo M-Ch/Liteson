@@ -26,7 +26,7 @@ namespace Liteson
 			Unescapes['\t'] = @"\t";
 		}
 
-		public JsonWriter(TextWriter target, WriterSettings settings)
+		public JsonWriter(TextWriter target, SerializationSettings settings)
 		{
 			_target = target;
 			_tab = settings.Tab;
@@ -150,11 +150,5 @@ namespace Liteson
 			for (var a = 0; a < _depth; a++)
 				_target.Write(_tab);
 		}
-	}
-
-	public class WriterSettings
-	{
-		public bool Indent { get; set; }
-		public string Tab { get; set; } = "\t";
 	}
 }

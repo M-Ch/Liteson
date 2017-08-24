@@ -10,7 +10,7 @@ namespace Liteson
 	{
 		private static readonly TypeInfo EnumerableType = typeof(IEnumerable).GetTypeInfo();
 
-		public static Func<JsonReader, object> ForType(Type type, Func<Type, TypeDescriptor> descriptorSource)
+		public static Func<JsonReader, object> ForType(Type type, TypeOptions options, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			var underlyingType = Nullable.GetUnderlyingType(type);
 			if(underlyingType != null)

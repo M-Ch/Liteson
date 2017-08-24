@@ -196,6 +196,11 @@ namespace Liteson.Tests
 		public void NullInt() => JsonConvert.Deserialize<int?>("null").Should().BeNull();
 
 		[Fact]
+		public void CamelCase() => JsonConvert
+			.Deserialize<(int,int,int)>("{\"item1\":1,\"item2\":2,\"item3\":3}", new SerializationSettings { CamelCaseNames = true })
+			.ShouldBeEquivalentTo((1,2,3));
+
+		[Fact]
 		public void NullProperties()
 		{
 			var expected = new NullableProperties

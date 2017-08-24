@@ -9,15 +9,15 @@ namespace Liteson
 	{
 		private static readonly TypeInfo EnumerableType = typeof(IEnumerable).GetTypeInfo();
 
-		public static Action<object, SerializationContext> ForType(Type type, Func<Type, TypeDescriptor> descriptorSource)
+		public static Action<object, SerializationContext> ForType(Type type, TypeOptions options, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			var underlyingType = Nullable.GetUnderlyingType(type);
 			if (underlyingType != null)
 				return ForNullable(underlyingType, descriptorSource);
 
 			return EnumerableType.IsAssignableFrom(type.GetTypeInfo())
-				? ForCollection(type, descriptorSource)
-				: ForComplex(type, descriptorSource);
+				? ForCollection(type, options, descriptorSource)
+				: ForComplex(type, options, descriptorSource);
 		}
 
 		private static Action<object, SerializationContext> ForNullable(Type underlyingType, Func<Type, TypeDescriptor> descriptorSource)
@@ -32,7 +32,7 @@ namespace Liteson
 			};
 		}
 
-		private static Action<object, SerializationContext> ForCollection(Type root, Func<Type, TypeDescriptor> descriptorSource)
+		private static Action<object, SerializationContext> ForCollection(Type root, TypeOptions options, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			var elementType = ReflectionUtils.FindCollectionElementType(root);
 			var descriptor = descriptorSource(elementType);
@@ -55,7 +55,7 @@ namespace Liteson
 			};
 		}
 
-		private static Action<object, SerializationContext> ForComplex(Type root, Func<Type, TypeDescriptor> descriptorSource)
+		private static Action<object, SerializationContext> ForComplex(Type root, TypeOptions options, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			var properties = root
 				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
@@ -69,10 +69,11 @@ namespace Liteson
 				.Concat(fields.Select(i => new {i.Name, Getter = new Func<object, object>(i.GetValue), ReturnType = i.FieldType}))
 				.Select(i => new
 				{
-					i.Name,
+					Name = BuildName(i.Name, options),
 					i.Getter,
 					Descriptor = descriptorSource(i.ReturnType)
-				});
+				})
+				.ToList();
 
 			return (obj, context) =>
 			{
@@ -100,6 +101,13 @@ namespace Liteson
 				}
 				context.Writer.EndObject();
 			};
+		}
+
+		private static string BuildName(string candidate, TypeOptions options)
+		{
+			if (options.HasFlag(TypeOptions.CamelCase))
+				return CamelCase.ToCamelCase(candidate);
+			return candidate;
 		}
 	}
 }

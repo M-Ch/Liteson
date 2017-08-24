@@ -6,7 +6,7 @@ namespace Liteson
 {
 	internal class TypeCatalog
 	{
-		private Dictionary<Type, TypeDescriptor> _descriptors = new List<TypeDescriptor>
+		private static readonly Dictionary<Type, TypeDescriptor> PrimitiveDescriptors = new List<TypeDescriptor>
 		{
 			ForPrimitive<bool>((v, c) => c.Writer.Write((bool) v), r => ParsedReading.ReadBool(r)),
 			ForPrimitive<byte>((v, c) => c.Writer.Write((byte) v), r => ParsedReading.ReadByte(r)),
@@ -29,33 +29,45 @@ namespace Liteson
 			ForPrimitive<Guid>((v, c) => c.Writer.Write((Guid) v), r => ParsedReading.ReadGuid(r))
 		}.ToDictionary(i => i.Type);
 
-		public TypeDescriptor GetDescriptor(Type type)
+		private Dictionary<Tuple<Type, TypeOptions>, TypeDescriptor> _descriptors = new Dictionary<Tuple<Type, TypeOptions>, TypeDescriptor>();
+
+		public TypeDescriptor GetDescriptor(Type type, TypeOptions options)
 		{
-			if (_descriptors.TryGetValue(type, out var value))
+			if (PrimitiveDescriptors.TryGetValue(type, out var primitive))
+				return primitive;
+			if ( _descriptors.TryGetValue(Tuple.Create(type, options), out var value))
 				return value;
 
 			//In case of multi-threaded concurrent initialization only values produced by one of concurrent threads will be put into final _descriptors dictionary.
 			//Other thread's work result will be discarded but it's fine because it will happen only once. 
 			//This way we don't need to use any locks or thread-safe collections all the time.
 			var descriptors = new Dictionary<Type, TypeDescriptor>();
-			TypeDescriptor DescriptorSource(Type t) => _descriptors.TryGetValue(t, out var descriptor) 
-				? descriptor 
-				: descriptors.TryGetValue(t, out var local) ? local : CreateDescriptorTree(t, descriptors, DescriptorSource);
+			TypeDescriptor DescriptorSource(Type t)
+			{
+				if(PrimitiveDescriptors.TryGetValue(t, out var descriptor))
+					return descriptor;
+				if(_descriptors.TryGetValue(Tuple.Create(t, options), out descriptor))
+					return descriptor;
+				return descriptors.TryGetValue(t, out descriptor)
+					? descriptor
+					: CreateDescriptorTree(t, options, descriptors, DescriptorSource);
+			}
 
-			var result = CreateDescriptorTree(type, descriptors, DescriptorSource);
-			foreach (var existing in _descriptors)
-				descriptors[existing.Key] = existing.Value;
+			var result = CreateDescriptorTree(type, options, descriptors, DescriptorSource);
+			var newDescriptors = new Dictionary<Tuple<Type, TypeOptions>, TypeDescriptor>(_descriptors);
+			foreach (var newDescriptor in descriptors)
+				newDescriptors[Tuple.Create(newDescriptor.Key, options)] = newDescriptor.Value;
 
-			_descriptors = descriptors;
+			_descriptors = newDescriptors;
 			return result;
 		}
 
-		private static TypeDescriptor CreateDescriptorTree(Type root, IDictionary<Type, TypeDescriptor> subDescriptors, Func<Type, TypeDescriptor> descriptorSource)
+		private static TypeDescriptor CreateDescriptorTree(Type root, TypeOptions options, IDictionary<Type, TypeDescriptor> subDescriptors, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			var descriptor = new TypeDescriptor { Type = root };
 			subDescriptors.Add(root, descriptor);
-			descriptor.Writer = TypeWriter.ForType(root, descriptorSource);
-			descriptor.Reader = TypeReader.ForType(root, descriptorSource);
+			descriptor.Writer = TypeWriter.ForType(root, options, descriptorSource);
+			descriptor.Reader = TypeReader.ForType(root, options, descriptorSource);
 			return descriptor;
 		}
 
@@ -66,4 +78,12 @@ namespace Liteson
 			Writer = writer
 		};
 	}
+
+	[Flags]
+	internal enum TypeOptions : byte
+	{
+		None =      0b00000000,
+		CamelCase = 0b00000001
+	}
+
 }

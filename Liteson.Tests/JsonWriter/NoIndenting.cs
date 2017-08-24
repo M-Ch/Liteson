@@ -12,7 +12,7 @@ namespace Liteson.Tests.JsonWriter
 		public NoIndenting()
 		{
 			_sw = new StringWriter();
-			_writer = new Liteson.JsonWriter(_sw, new WriterSettings());
+			_writer = new Liteson.JsonWriter(_sw, new SerializationSettings());
 		}
 
 		[Fact]

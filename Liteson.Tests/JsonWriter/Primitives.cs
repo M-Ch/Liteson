@@ -15,7 +15,7 @@ namespace Liteson.Tests.JsonWriter
 		public Primitives()
 		{
 			_sw = new StringWriter();
-			_writer = new Liteson.JsonWriter(_sw, new WriterSettings());
+			_writer = new Liteson.JsonWriter(_sw, new SerializationSettings());
 		}
 
 		[Theory]

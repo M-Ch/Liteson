@@ -63,6 +63,11 @@ namespace Liteson
 
 		public void Write(string text)
 		{
+			if (text == null)
+			{
+				_target.Write("null");
+				return;
+			}
 			_target.Write('"');
 			foreach (var character in text)
 			{

@@ -50,12 +50,11 @@
     <Compile Include="ParsedReading.cs" />
     <Compile Include="JsonReader.cs" />
     <Compile Include="JsonWriter.cs" />
-    <Compile Include="ObjectWriter.cs" />
     <Compile Include="Parsing.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReflectionUtils.cs" />
     <Compile Include="SerializationContext.cs" />
-    <Compile Include="SerializationPlan.cs" />
+    <Compile Include="TypeWriter.cs" />
     <Compile Include="StringBuffer.cs" />
     <Compile Include="TypeCatalog.cs" />
     <Compile Include="TypeDescriptor.cs" />

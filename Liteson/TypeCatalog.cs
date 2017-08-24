@@ -54,7 +54,7 @@ namespace Liteson
 		{
 			var descriptor = new TypeDescriptor { Type = root };
 			subDescriptors.Add(root, descriptor);
-			descriptor.SerializationPlan = SerializationPlan.ForType(root, descriptorSource);
+			descriptor.Writer = TypeWriter.ForType(root, descriptorSource);
 			descriptor.Reader = TypeReader.ForType(root, descriptorSource);
 			return descriptor;
 		}
@@ -63,10 +63,7 @@ namespace Liteson
 		{
 			Type = typeof(T),
 			Reader = reader,
-			SerializationPlan = new SerializationPlan
-			{
-				Steps = new[] {writer}
-			}
+			Writer = writer
 		};
 	}
 }

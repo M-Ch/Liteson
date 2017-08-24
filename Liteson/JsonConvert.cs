@@ -29,7 +29,7 @@ namespace Liteson
 				Depth = 10 //todo
 			};
 
-			ObjectWriter.Write(value, context, descriptor.SerializationPlan);
+			descriptor.Writer(value, context);
 			return sw.ToString();
 		}
 	}

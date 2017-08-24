@@ -52,7 +52,21 @@ namespace Liteson.Tests.JsonWriter
 		[Fact] public void Decimal() => Run(() => _writer.Write(3452345354.65344m)).ShouldBeEquivalentTo(Newton.SerializeObject(3452345354.65344m));
 		[Fact] public void Guid() => Run(() => _writer.Write(new Guid())).ShouldBeEquivalentTo(Newton.SerializeObject(new Guid()));
 		[Fact] public void Bool() => Run(() => _writer.Write(false)).ShouldBeEquivalentTo(Newton.SerializeObject(false));
-		[Fact] public void Date() => Run(() => _writer.Write(DateTime.Parse("2012-12-22 14:56:33.78"))).ShouldBeEquivalentTo(Newton.SerializeObject(DateTime.Parse("2012-12-22 14:56:33.78")));
+
+		[Theory]
+		[InlineData("2012-12-22 14:56:33.78")]
+		[InlineData("2012-12-22 14:56:33.7")]
+		[InlineData("2012-12-22 14:56:33.782")]
+		[InlineData("2012-12-22 14:56:33.7822")]
+		[InlineData("2012-12-22 14:56:33.78286")]
+		[InlineData("2012-12-22 14:56:33.7828675")]
+		[InlineData("2012-12-22 14:56:33+02:45")]
+		[InlineData("2012-12-22 14:56:33")]
+		[InlineData("2012-12-22 14:56:33Z")]
+		[InlineData("2012-12-22")]
+		public void Dates(string date) => Run(() => _writer.Write(DateTime.Parse(date)))
+			.ShouldBeEquivalentTo(Newton.SerializeObject(DateTime.Parse(date)));
+
 		[Fact] public void Time() => Run(() => _writer.Write(TimeSpan.FromDays(2.345))).ShouldBeEquivalentTo(Newton.SerializeObject(TimeSpan.FromDays(2.345)));
 
 		[Fact] public void UtcDate()

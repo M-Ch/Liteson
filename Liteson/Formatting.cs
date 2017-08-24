@@ -20,11 +20,13 @@ namespace Liteson
 			WriteDatePartFast(dateTime.Minute, writer);
 			writer.Write(':');
 			WriteDatePartFast(dateTime.Second, writer);
-			var ms = dateTime.Millisecond;
+			var ms = dateTime.Ticks % TimeSpan.TicksPerSecond;
 			if (ms > 0)
 			{
+				while (ms % 10 == 0)
+					ms /= 10;
 				writer.Write('.');
-				WriteFast(ms, writer, buffer);
+				writer.Write(ms);
 			}
 			if (dateTime.Kind == DateTimeKind.Utc)
 				writer.Write('Z');

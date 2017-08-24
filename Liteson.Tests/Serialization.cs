@@ -113,6 +113,29 @@ namespace Liteson.Tests
 			.Serialize(new PublicFields { A = true, B = 6, C = 'g' })
 			.ShouldBeEquivalentTo("{\"A\":true,\"B\":6,\"C\":\"g\"}");
 
+		[Fact]
+		public void NullProperties()
+		{
+			var input = new NullableProperties
+			{
+				Text = "test"
+			};
+			JsonConvert.Serialize(input).ShouldBeEquivalentTo(Newton.SerializeObject(input));
+		}
+
+		[Fact]
+		public void NullStruct() => JsonConvert.Serialize(new NullablePropertyStruct {Value = 7}).ShouldBeEquivalentTo("{\"Value\":7,\"Property\":null}");
+
+		[Fact]
+		public void NullSubStruct() => JsonConvert.Serialize(new StructWithNullableSubStruct { Value = 7 }).ShouldBeEquivalentTo("{\"Value\":7,\"Field\":null}");
+
+		[Fact]
+		public void NullFilledSubStruct() => JsonConvert
+			.Serialize(new StructWithNullableSubStruct { Value = 7, Field = new StructType() })
+			.ShouldBeEquivalentTo("{\"Value\":7,\"Field\":{\"Value\":0,\"Value2\":0}}");
+
+		[Fact]
+		public void ArrayOfNulls() => JsonConvert.Serialize(new List<StructType?> {null, null}).ShouldBeEquivalentTo("[null,null]");
 
 		private class GameData
 		{

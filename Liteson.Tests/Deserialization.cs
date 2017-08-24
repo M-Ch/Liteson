@@ -192,6 +192,48 @@ namespace Liteson.Tests
 			public int B;
 		}
 
+		[Fact]
+		public void NullInt() => JsonConvert.Deserialize<int?>("null").Should().BeNull();
+
+		[Fact]
+		public void NullProperties()
+		{
+			var expected = new NullableProperties
+			{
+				Text = "test"
+			};
+			JsonConvert.Deserialize<NullableProperties>(Newton.SerializeObject(expected)).ShouldBeEquivalentTo(expected);
+		}
+
+		[Fact]
+		public void NullStruct() => JsonConvert
+			.Deserialize<NullablePropertyStruct>("{\"Value\":90,\"Property\":null}")
+			.ShouldBeEquivalentTo(new NullablePropertyStruct
+			{
+				Value = 90
+			});
+
+		[Fact]
+		public void NullSubStruct() => JsonConvert
+			.Deserialize<StructWithNullableSubStruct>("{\"Value\":90,\"Field\":null}")
+			.ShouldBeEquivalentTo(new StructWithNullableSubStruct
+			{
+				Value = 90
+			});
+
+		[Fact]
+		public void NullFilledSubStruct() => JsonConvert
+			.Deserialize<StructWithNullableSubStruct>("{\"Value\":7,\"Field\":{\"Value\":0,\"Value2\":0}}")
+			.ShouldBeEquivalentTo(new StructWithNullableSubStruct
+			{
+				Value = 7,
+				Field = new StructType()
+			});
+
+		[Fact]
+		public void ArrayOfNulls() => JsonConvert.Deserialize<StructType?[]>("[null,null]")
+			.ShouldAllBeEquivalentTo(new StructType?[] {null, null});
+
 		//[Fact] //run in release mode
 		public void Performance()
 		{

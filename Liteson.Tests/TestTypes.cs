@@ -49,4 +49,23 @@ namespace Liteson.Tests
 		public int B;
 		public char C;
 	}
+
+	public class NullableProperties
+	{
+		public int? Int { get; set; }
+		public bool? Bool { get; set; }
+		public string Text { get; set; }
+	}
+
+	public class NullablePropertyStruct
+	{
+		public int Value { get; set; }
+		public StructType? Property { get; set; }
+	}
+
+	public struct StructWithNullableSubStruct
+	{
+		public StructType? Field;
+		public int Value { get; set; }
+	}
 }

@@ -9,9 +9,28 @@ namespace Liteson
 	{
 		private static readonly TypeInfo EnumerableType = typeof(IEnumerable).GetTypeInfo();
 
-		public static Action<object, SerializationContext> ForType(Type type, Func<Type, TypeDescriptor> descriptorSource) => EnumerableType.IsAssignableFrom(type.GetTypeInfo())
+		public static Action<object, SerializationContext> ForType(Type type, Func<Type, TypeDescriptor> descriptorSource)
+		{
+			var underlyingType = Nullable.GetUnderlyingType(type);
+			if (underlyingType != null)
+				return ForNullable(underlyingType, descriptorSource);
+
+			return EnumerableType.IsAssignableFrom(type.GetTypeInfo())
 				? ForCollection(type, descriptorSource)
 				: ForComplex(type, descriptorSource);
+		}
+
+		private static Action<object, SerializationContext> ForNullable(Type underlyingType, Func<Type, TypeDescriptor> descriptorSource)
+		{
+			var descriptor = descriptorSource(underlyingType);
+			return (obj, context) =>
+			{
+				if (obj != null)
+					descriptor.Writer(obj, context);
+				else
+					context.Writer.WriteNull();
+			};
+		}
 
 		private static Action<object, SerializationContext> ForCollection(Type root, Func<Type, TypeDescriptor> descriptorSource)
 		{
@@ -38,15 +57,12 @@ namespace Liteson
 
 		private static Action<object, SerializationContext> ForComplex(Type root, Func<Type, TypeDescriptor> descriptorSource)
 		{
-			var underlyingType = Nullable.GetUnderlyingType(root);
-			var targetType = underlyingType ?? root;
-
-			var properties = targetType
+			var properties = root
 				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
 				.Where(i => i.GetMethod != null)
 				.ToList();
 
-			var fields = targetType.GetFields(BindingFlags.Instance | BindingFlags.Public).ToList();
+			var fields = root.GetFields(BindingFlags.Instance | BindingFlags.Public).ToList();
 
 			var all = properties
 				.Select(i => new {i.Name, Getter = ReflectionUtils.BuildGetter(i), ReturnType = i.PropertyType})

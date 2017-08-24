@@ -184,6 +184,18 @@ namespace Liteson.Tests
 		public void Tuple() => JsonConvert.Deserialize<(int, int)>("{\"Item1\":1,\"Item2\":2}").ShouldBeEquivalentTo((1, 2));
 
 		[Fact]
+		public void CustomNames() => JsonConvert
+			.Deserialize<WithCustomName>("{\"f\":\"a\",\"v\":1}")
+			.ShouldBeEquivalentTo(new WithCustomName { Foo = "a", Value = 1 });
+
+		[Theory]
+		[InlineData("{\"foo\":\"a\",\"value\":1}")]
+		[InlineData("{\"Foo\":\"a\",\"Value\":1}")]
+		public void InvalidCustomNames(string input) => JsonConvert
+			.Deserialize<WithCustomName>(input)
+			.ShouldBeEquivalentTo(new WithCustomName());
+
+		[Fact]
 		public void StructWithFieldAndProperty() => JsonConvert.Deserialize<FieldsAndProperties>("{\"A\":1,\"B\":2}").ShouldBeEquivalentTo(new FieldsAndProperties { A = 1, B = 2 });
 
 		private struct FieldsAndProperties

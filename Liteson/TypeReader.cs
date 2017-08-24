@@ -153,7 +153,15 @@ namespace Liteson
 
 		private static IEnumerable<string> JsonNames(MemberInfo property)
 		{
+			var customName = property.GetCustomAttribute<JsonProperty>()?.Name;
+			if (!string.IsNullOrEmpty(customName))
+			{
+				yield return customName;
+				yield break;
+			}
+
 			yield return property.Name;
+			yield return CamelCase.ToCamelCase(property.Name);
 			yield return property.Name.ToLower();
 		}
 	}

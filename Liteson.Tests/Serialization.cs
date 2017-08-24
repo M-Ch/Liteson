@@ -86,6 +86,9 @@ namespace Liteson.Tests
 		public void Tuple() => JsonConvert.Serialize((a: 1, b: 2, c: 3)).ShouldBeEquivalentTo("{\"Item1\":1,\"Item2\":2,\"Item3\":3}");
 
 		[Fact]
+		public void CustomNames() => JsonConvert.Serialize(new WithCustomName {Foo = "a", Value = 1}).ShouldBeEquivalentTo("{\"f\":\"a\",\"v\":1}");
+
+		[Fact]
 		public void CamelCase() => JsonConvert
 			.Serialize((1,2,3), new SerializationSettings { CamelCaseNames = true })
 			.ShouldBeEquivalentTo("{\"item1\":1,\"item2\":2,\"item3\":3}");

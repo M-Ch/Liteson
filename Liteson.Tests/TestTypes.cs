@@ -68,4 +68,13 @@ namespace Liteson.Tests
 		public StructType? Field;
 		public int Value { get; set; }
 	}
+
+	public class WithCustomName
+	{
+		[JsonProperty("f")]
+		public string Foo { get; set; }
+
+		[JsonProperty("v")]
+		public int Value;
+	}
 }

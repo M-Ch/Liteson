@@ -65,11 +65,11 @@ namespace Liteson
 			var fields = root.GetFields(BindingFlags.Instance | BindingFlags.Public).ToList();
 
 			var all = properties
-				.Select(i => new {i.Name, Getter = ReflectionUtils.BuildGetter(i), ReturnType = i.PropertyType})
-				.Concat(fields.Select(i => new {i.Name, Getter = new Func<object, object>(i.GetValue), ReturnType = i.FieldType}))
+				.Select(i => new {Info = (MemberInfo)i, Getter = ReflectionUtils.BuildGetter(i), ReturnType = i.PropertyType})
+				.Concat(fields.Select(i => new {Info = (MemberInfo)i, Getter = new Func<object, object>(i.GetValue), ReturnType = i.FieldType}))
 				.Select(i => new
 				{
-					Name = BuildName(i.Name, options),
+					Name = BuildName(i.Info, options),
 					i.Getter,
 					Descriptor = descriptorSource(i.ReturnType)
 				})
@@ -103,11 +103,14 @@ namespace Liteson
 			};
 		}
 
-		private static string BuildName(string candidate, TypeOptions options)
+		private static string BuildName(MemberInfo member, TypeOptions options)
 		{
+			var customName = member.GetCustomAttribute<JsonProperty>()?.Name;
+			if (!string.IsNullOrEmpty(customName))
+				return customName;
 			if (options.HasFlag(TypeOptions.CamelCase))
-				return CamelCase.ToCamelCase(candidate);
-			return candidate;
+				return CamelCase.ToCamelCase(member.Name);
+			return member.Name;
 		}
 	}
 }

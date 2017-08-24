@@ -35,7 +35,7 @@ namespace Liteson
 				return value;
 
 			//In case of multi-threaded concurrent initialization only values produced by one of concurrent threads will be put into final _descriptors dictionary.
-			//Other thread's work result will be discarded but. It's fine because it will happen only once. 
+			//Other thread's work result will be discarded but it's fine because it will happen only once. 
 			//This way we don't need to use any locks or thread-safe collections all the time.
 			var descriptors = new Dictionary<Type, TypeDescriptor>();
 			TypeDescriptor DescriptorSource(Type t) => _descriptors.TryGetValue(t, out var descriptor) 
@@ -52,10 +52,7 @@ namespace Liteson
 
 		private static TypeDescriptor CreateDescriptorTree(Type root, IDictionary<Type, TypeDescriptor> subDescriptors, Func<Type, TypeDescriptor> descriptorSource)
 		{
-			var descriptor = new TypeDescriptor
-			{
-				Type = root
-			};
+			var descriptor = new TypeDescriptor { Type = root };
 			subDescriptors.Add(root, descriptor);
 			descriptor.SerializationPlan = SerializationPlan.ForType(root, descriptorSource);
 			descriptor.Reader = TypeReader.ForType(root, descriptorSource);

@@ -86,6 +86,7 @@ namespace Liteson
 				? ReflectionUtils.BuildConstructor(type)
 				: () => Activator.CreateInstance(typeof(Box<>).MakeGenericType(type));
 
+			//struct types are internally wrapped into Box<T> type (see ReflectionUtils)
 			var unwrapper = !type.IsClass
 				? new Func<object, object>(i => ((IBox) i).Value)
 				: null;

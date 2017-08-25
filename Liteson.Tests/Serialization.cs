@@ -145,6 +145,24 @@ namespace Liteson.Tests
 		[Fact]
 		public void ArrayOfNulls() => JsonConvert.Serialize(new List<StructType?> {null, null}).ShouldBeEquivalentTo("[null,null]");
 
+		[Fact]
+		public void EnumToInt() => JsonConvert.Serialize(SimpleEnum.Baz).ShouldBeEquivalentTo("2");
+
+		[Fact]
+		public void FlagsToInt() => JsonConvert.Serialize(FlagEnum.Flag1 | FlagEnum.Flag2).ShouldBeEquivalentTo("9");
+
+		[Fact]
+		public void ValueOutOfEnumToInt() => JsonConvert.Serialize((SimpleEnum) 456).ShouldBeEquivalentTo("456");
+
+		[Fact]
+		public void EnumProperty() => JsonConvert.Serialize(new WithEnum {Simple = SimpleEnum.Baz}).ShouldBeEquivalentTo("{\"Simple\":2}");
+
+		[Fact]
+		public void EnumNullable() => JsonConvert.Serialize(new NullableEnum()).ShouldBeEquivalentTo("{\"Simple\":null}");
+
+		[Fact]
+		public void FilledNullableEnum() => JsonConvert.Serialize(new NullableEnum { Simple = SimpleEnum.Bar }).ShouldBeEquivalentTo("{\"Simple\":1}");
+
 		private class GameData
 		{
 			public int Id { get; set; }

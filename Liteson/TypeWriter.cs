@@ -11,13 +11,22 @@ namespace Liteson
 
 		public static Action<object, SerializationContext> ForType(Type type, TypeOptions options, Func<Type, TypeDescriptor> descriptorSource)
 		{
-			var underlyingType = Nullable.GetUnderlyingType(type);
-			if (underlyingType != null)
-				return ForNullable(underlyingType, descriptorSource);
+			var nullable = Nullable.GetUnderlyingType(type);
+			if (nullable != null)
+				return ForNullable(nullable, descriptorSource);
+
+			if (type.IsEnum)
+				return ForEnum(type, descriptorSource);
 
 			return EnumerableType.IsAssignableFrom(type.GetTypeInfo())
 				? ForCollection(type, options, descriptorSource)
 				: ForComplex(type, options, descriptorSource);
+		}
+
+		private static Action<object, SerializationContext> ForEnum(Type type, Func<Type, TypeDescriptor> descriptorSource)
+		{
+			var descriptor = descriptorSource(Enum.GetUnderlyingType(type));
+			return (obj, context) => descriptor.Writer(obj, context);
 		}
 
 		private static Action<object, SerializationContext> ForNullable(Type underlyingType, Func<Type, TypeDescriptor> descriptorSource)

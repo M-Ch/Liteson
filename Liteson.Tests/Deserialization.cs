@@ -251,6 +251,62 @@ namespace Liteson.Tests
 		public void ArrayOfNulls() => JsonConvert.Deserialize<StructType?[]>("[null,null]")
 			.ShouldAllBeEquivalentTo(new StructType?[] {null, null});
 
+		[Theory]
+		[InlineData("[]"), InlineData("{}"), InlineData("1.4"), InlineData("null"), InlineData("true"), InlineData("false"), InlineData("\"unknown\"")]
+		public void InvalidEnum(string input) => Assert.Throws<JsonException>(() => JsonConvert.Deserialize<SimpleEnum>(input));
+
+		[Fact]
+		public void EnumFromInt() => JsonConvert.Deserialize<SimpleEnum>("2").ShouldBeEquivalentTo(SimpleEnum.Baz);
+
+		[Fact]
+		public void EnumFromString() => JsonConvert.Deserialize<SimpleEnum>("\"Baz\"").ShouldBeEquivalentTo(SimpleEnum.Baz);
+
+		[Fact]
+		public void ValueOutOfEnumToInt() => JsonConvert.Deserialize<SimpleEnum>("-2562").ShouldBeEquivalentTo((SimpleEnum)(-2562));
+
+		[Fact]
+		public void NullableInt() => JsonConvert.Deserialize<SimpleEnum?>("null").Should().BeNull();
+
+		[Fact]
+		public void EnumProperty() => JsonConvert.Deserialize<WithEnum>("{\"Simple\":2}").ShouldBeEquivalentTo(new WithEnum { Simple = SimpleEnum.Baz });
+
+		[Fact]
+		public void EnumPropertyFromText() => JsonConvert.Deserialize<WithEnum>("{\"Simple\":\"Foo\"}").ShouldBeEquivalentTo(new WithEnum { Simple = SimpleEnum.Foo });
+
+		[Fact]
+		public void EnumNullable() => JsonConvert.Deserialize<NullableEnum>("{\"Simple\":null}").ShouldBeEquivalentTo(new NullableEnum());
+
+		[Fact]
+		public void EnumNullableField() => JsonConvert.Deserialize<WithNullableField>("{\"Simple\":null}").ShouldBeEquivalentTo(new WithNullableField());
+
+		[Fact]
+		public void StructWithNullableEnumFieldEmpty() => JsonConvert.Deserialize<StructWithNullableEnumField>("{\"Simple\":null}").ShouldBeEquivalentTo(new StructWithNullableEnumField());
+
+		[Theory]
+		[InlineData("{\"Simple\":1}"), InlineData("{\"Simple\":\"Bar\"}")]
+		public void FilledNullableEnum(string input) => JsonConvert
+			.Deserialize<NullableEnum>(input)
+			.ShouldBeEquivalentTo(new NullableEnum { Simple = SimpleEnum.Bar });
+
+		[Theory]
+		[InlineData("{\"Simple\":1}"), InlineData("{\"Simple\":\"Bar\"}")]
+		public void FilledNullableEnumField(string input) => JsonConvert
+			.Deserialize<WithNullableField>(input)
+			.ShouldBeEquivalentTo(new WithNullableField { Simple = SimpleEnum.Bar });
+
+		[Theory]
+		[InlineData("{\"Simple\":1}"), InlineData("{\"Simple\":\"Bar\"}")]
+		public void StructWithNullableEnumField(string input) => JsonConvert
+			.Deserialize<StructWithNullableEnumField>(input)
+			.ShouldBeEquivalentTo(new StructWithNullableEnumField { Simple = SimpleEnum.Bar });
+
+		[Fact]
+		public void InvaliValueForEnumProperty() => Assert.Throws<JsonException>(() => JsonConvert.Deserialize<NullableEnum>("{\"Simple\":[]}"));
+
+		[Fact]
+		public void FlagsToInt() => JsonConvert.Deserialize<FlagEnum>("9").ShouldBeEquivalentTo(FlagEnum.Flag1 | FlagEnum.Flag2);
+
+
 		//[Fact] //run in release mode
 		public void Performance()
 		{

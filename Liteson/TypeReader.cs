@@ -12,13 +12,37 @@ namespace Liteson
 
 		public static Func<JsonReader, object> ForType(Type type, TypeOptions options, Func<Type, TypeDescriptor> descriptorSource)
 		{
-			var underlyingType = Nullable.GetUnderlyingType(type);
-			if(underlyingType != null)
-				return ForNullable(underlyingType, descriptorSource);
+			var nullable = Nullable.GetUnderlyingType(type);
+			if(nullable != null)
+				return ForNullable(nullable, descriptorSource);
+
+			if (type.IsEnum)
+				return ForEnum(type, descriptorSource);
 
 			return EnumerableType.IsAssignableFrom(type.GetTypeInfo())
 				? ForCollection(type, descriptorSource)
 				: ForComplex(type, descriptorSource);
+		}
+
+		private static Func<JsonReader, object> ForEnum(Type type, Func<Type, TypeDescriptor> descriptorSource)
+		{
+			var descriptor = descriptorSource(Enum.GetUnderlyingType(type));
+			var enumValues = Enum.GetValues(type).Cast<object>().ToDictionary(i => Enum.GetName(type, i));
+
+			return reader =>
+			{
+				if (reader.PeekToken().HasFlag(JsonToken.Number))
+					return Enum.ToObject(type, descriptor.Reader(reader));
+
+				var bufferPart = new BufferPart();
+				var token = reader.Read(ref bufferPart, out var text);
+				if (token != JsonToken.String)
+					throw Exceptions.BadToken(reader, token, JsonToken.String | JsonToken.Number);
+
+				return enumValues.TryGetValue(text, out var value)
+					? value
+					: throw new JsonException($"Unknown enum value '{text}' near line {reader.Line}, column {reader.Column}.");
+			};
 		}
 
 		private static Func<JsonReader, object> ForNullable(Type underlyingType, Func<Type, TypeDescriptor> descriptorSource)

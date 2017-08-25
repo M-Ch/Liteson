@@ -74,7 +74,48 @@ namespace Liteson.Tests
 		[JsonProperty("f")]
 		public string Foo { get; set; }
 
-		[JsonProperty("v")]
-		public int Value;
+		[JsonProperty("v")] public int Value;
 	}
+
+	public enum SimpleEnum
+	{
+		Foo,
+		Bar,
+		Baz
+	}
+
+	[Flags]
+	public enum FlagEnum
+	{
+		Flag1 = 1,
+		Flag2 = 8,
+		All = Flag1 | Flag2
+	}
+
+	public class WithEnum
+	{
+		public SimpleEnum Simple { get; set; }
+	}
+
+	public class WithNullableField
+	{
+		public SimpleEnum? Simple;
+	}
+
+	public class NullableEnum
+	{
+		public SimpleEnum? Simple { get; set; }
+	}
+
+	public struct StructWithNullableEnumField
+	{
+		public SimpleEnum? Simple;
+	}
+
+	public enum LongEnum : long
+	{
+		First = 324523452343243,
+		Second = 1241234123423
+	}
+
 }

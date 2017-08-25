@@ -57,12 +57,13 @@ namespace Liteson
 
 		private static Action<object, SerializationContext> ForComplex(Type root, TypeOptions options, Func<Type, TypeDescriptor> descriptorSource)
 		{
-			var properties = root
+			var info = root.GetTypeInfo();
+			var properties = info
 				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
 				.Where(i => i.GetMethod != null)
 				.ToList();
 
-			var fields = root.GetFields(BindingFlags.Instance | BindingFlags.Public).ToList();
+			var fields = info.GetFields(BindingFlags.Instance | BindingFlags.Public).ToList();
 
 			var all = properties
 				.Select(i => new {Info = (MemberInfo)i, Getter = ReflectionUtils.BuildGetter(i), ReturnType = i.PropertyType})
@@ -105,7 +106,7 @@ namespace Liteson
 
 		private static string BuildName(MemberInfo member, TypeOptions options)
 		{
-			var customName = member.GetCustomAttribute<JsonProperty>()?.Name;
+			var customName = member.GetCustomAttribute<JsonPropertyAttribute>()?.Name;
 			if (!string.IsNullOrEmpty(customName))
 				return customName;
 			if (options.HasFlag(TypeOptions.CamelCase))

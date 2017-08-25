@@ -47,7 +47,7 @@
     <Compile Include="Formatting.cs" />
     <Compile Include="JsonConvert.cs" />
     <Compile Include="JsonException.cs" />
-    <Compile Include="JsonProperty.cs" />
+    <Compile Include="JsonPropertyAttribute.cs" />
     <Compile Include="SerializationSettings.cs" />
     <Compile Include="ValueSkipper.cs" />
     <Compile Include="ParsedReading.cs" />

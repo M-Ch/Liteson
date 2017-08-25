@@ -88,15 +88,16 @@ namespace Liteson
 
 		private static Func<JsonReader, object> ForComplex(Type type, Func<Type, TypeDescriptor> descriptorSource)
 		{
-			if(type.IsClass && type.GetConstructor(Array.Empty<Type>()) == null)
+			var info = type.GetTypeInfo();
+			if(info.IsClass && info.GetConstructor(Array.Empty<Type>()) == null)
 				return reader => throw new JsonException($"Type {type} must define public parameterless constructor.");
 
-			var properties = type
+			var properties = info
 				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
 				.Where(i => i.SetMethod != null && i.GetMethod != null)
 				.Select(i => new {Property = (MemberInfo)i, Setter = ReflectionUtils.BuildSetter(i), Descriptor = descriptorSource(i.PropertyType)});
 
-			var fields = type
+			var fields = info
 				.GetFields(BindingFlags.Instance | BindingFlags.Public)
 				.Select(i => new {Property = (MemberInfo)i, Setter = ReflectionUtils.BuildFieldSetter(i), Descriptor = descriptorSource(i.FieldType)});
 
@@ -106,12 +107,12 @@ namespace Liteson
 				.GroupBy(i => i.Name)
 				.ToDictionary(i => i.Key, i => i.First());
 
-			var constructor = type.IsClass
+			var constructor = info.IsClass
 				? ReflectionUtils.BuildConstructor(type)
 				: () => Activator.CreateInstance(typeof(Box<>).MakeGenericType(type));
 
 			//struct types are internally wrapped into Box<T> type (see ReflectionUtils)
-			var unwrapper = !type.IsClass
+			var unwrapper = !info.IsClass
 				? new Func<object, object>(i => ((IBox) i).Value)
 				: null;
 
@@ -120,7 +121,7 @@ namespace Liteson
 				var bufferPart = new BufferPart();
 				var token = reader.Read(ref bufferPart, out var _);
 				if (token == JsonToken.Null)
-					return type.IsClass ? (object)null : throw new JsonException($"Unable to assign null value to struct type near line {reader.Line}, column {reader.Column}.");
+					return info.IsClass ? (object)null : throw new JsonException($"Unable to assign null value to struct type near line {reader.Line}, column {reader.Column}.");
 				if (token != JsonToken.ObjectStart)
 					throw Exceptions.BadToken(reader, token, JsonToken.ObjectStart);
 				var target = constructor();
@@ -153,7 +154,7 @@ namespace Liteson
 
 		private static IEnumerable<string> JsonNames(MemberInfo property)
 		{
-			var customName = property.GetCustomAttribute<JsonProperty>()?.Name;
+			var customName = property.GetCustomAttribute<JsonPropertyAttribute>()?.Name;
 			if (!string.IsNullOrEmpty(customName))
 			{
 				yield return customName;

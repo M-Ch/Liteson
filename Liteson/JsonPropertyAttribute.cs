@@ -3,9 +3,9 @@
 namespace Liteson
 {
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-	public sealed class JsonProperty : Attribute
+	public sealed class JsonPropertyAttribute : Attribute
 	{
 		public string Name { get; }
-		public JsonProperty(string name) => Name = name;
+		public JsonPropertyAttribute(string name) => Name = name;
 	}
 }

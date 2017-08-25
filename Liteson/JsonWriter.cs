@@ -30,7 +30,7 @@ namespace Liteson
 		{
 			_target = target;
 			_tab = settings.Tab;
-			_newLine = settings.Indent ? Environment.NewLine : null;
+			_newLine = settings.Indent ? settings.NewLine : null;
 		}
 
 		public void BeginObject() => BeginComplex('{');

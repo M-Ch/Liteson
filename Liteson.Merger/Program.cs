@@ -50,7 +50,7 @@ namespace Liteson.Merger
 
 			var formatted = Formatter.Format(result, new AdhocWorkspace());
 			var text = formatted.ToFullString();
-			File.WriteAllText(Path.Combine(slnDir, "Liteson.merged.cs"), text);
+			File.WriteAllText(Path.Combine(slnDir, "Liteson.merged.cs"), text.Replace("\t", "    "));
 		}
 
 		private static BaseTypeDeclarationSyntax RewriteAccess(BaseTypeDeclarationSyntax declaration)
@@ -60,6 +60,7 @@ namespace Liteson.Merger
 				case ClassDeclarationSyntax classSyntax: return classSyntax.WithModifiers(classSyntax.Modifiers.Select(RewriteModifier));
 				case EnumDeclarationSyntax enumSyntax: return enumSyntax.WithModifiers(enumSyntax.Modifiers.Select(RewriteModifier));
 				case StructDeclarationSyntax structSyntax: return structSyntax.WithModifiers(structSyntax.Modifiers.Select(RewriteModifier));
+				case InterfaceDeclarationSyntax interfaceSyntax: return interfaceSyntax.WithModifiers(interfaceSyntax.Modifiers.Select(RewriteModifier));
 				default: throw new Exception($"Not supported top level syntax {declaration.GetType().Name}");
 			}
 		}

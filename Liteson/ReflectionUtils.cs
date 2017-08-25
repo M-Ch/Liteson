@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -31,7 +32,7 @@ namespace Liteson
 		public static Type FindCollectionElementType(Type enumerableType)
 		{
 			var interfaces = enumerableType.GetTypeInfo().ImplementedInterfaces.Select(i => i.GetTypeInfo()).ToList();
-			var genericEnumerable = new[] { enumerableType }.Concat(interfaces).FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == GenericEnumerableType);
+			var genericEnumerable = new[] { enumerableType.GetTypeInfo() }.Concat(interfaces).FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == GenericEnumerableType);
 
 			return genericEnumerable?.GenericTypeArguments[0] ?? ObjectType;
 		}
@@ -44,7 +45,7 @@ namespace Liteson
 
 		public static Action<object, object> BuildSetter(PropertyInfo property)
 		{
-			var method = property.DeclaringType.IsClass
+			var method = property.DeclaringType.GetTypeInfo().IsClass
 				? ParametrizedActionClassInfo
 				: ParametrizedActionStructInfo;
 			var genericBuild = method.MakeGenericMethod(property.DeclaringType, property.PropertyType);
@@ -53,7 +54,7 @@ namespace Liteson
 
 		public static Func<object, object> BuildParameterlessFunc<TTarget, TResult>(MethodInfo method)
 		{
-			if (typeof(TTarget).IsClass)
+			if (typeof(TTarget).GetTypeInfo().IsClass)
 			{
 				var bound = (Func<TTarget, TResult>) method.CreateDelegate(typeof(Func<TTarget, TResult>));
 				return i => bound((TTarget) i);
@@ -88,7 +89,7 @@ namespace Liteson
 
 		public static Action<object, object> BuildFieldSetter(FieldInfo field)
 		{
-			if (field.DeclaringType.IsClass)
+			if (field.DeclaringType.GetTypeInfo().IsClass)
 				return field.SetValue;
 
 			return (target, value) =>
@@ -101,30 +102,11 @@ namespace Liteson
 		public static Func<object> BuildConstructorFunc<T>()
 		{
 			var type = typeof(T);
-			var method = new DynamicMethod("$Ctor" + type, type, null, type);
-			var generator = method.GetILGenerator();
-			var constructor = type.GetConstructor(Type.EmptyTypes);
-			generator.Emit(OpCodes.Newobj, constructor);
-			generator.Emit(OpCodes.Ret);
-			var func = (Func<T>)method.CreateDelegate(typeof(Func<T>));
-			Func<object> fallback = null;
-			return () =>
-			{
-				try
-				{
-					return fallback == null ? func() : fallback();
-				}
-				catch(MethodAccessException) //it can happen especially when using very nested generic types etc.
-				{
-					lock (method)
-					{
-						if (fallback != null)
-							throw;
-						fallback = () => constructor.Invoke(Array.Empty<object>());
-					}
-					return fallback();
-				}
-			};
+			var info = type.GetTypeInfo();
+			var constructor = info.GetConstructor(Type.EmptyTypes);
+			var newExp = Expression.New(constructor);
+			var func = (Func<T>)Expression.Lambda(typeof(Func<T>), newExp).Compile();
+			return () => func();
 		}
 	}
 

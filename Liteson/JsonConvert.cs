@@ -36,6 +36,8 @@ namespace Liteson
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private static TypeOptions OptionsFromSettings(SerializationSettings settings) => settings.CamelCaseNames ? TypeOptions.CamelCase : TypeOptions.None;
+		private static TypeOptions OptionsFromSettings(SerializationSettings settings) =>
+			(settings.CamelCaseNames ? TypeOptions.CamelCase : TypeOptions.None) |
+			(settings.EnumsToStrings ? TypeOptions.EnumsToStrings : TypeOptions.None);
 	}
 }

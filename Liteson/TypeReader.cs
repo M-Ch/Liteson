@@ -10,7 +10,7 @@ namespace Liteson
 	{
 		private static readonly TypeInfo EnumerableType = typeof(IEnumerable).GetTypeInfo();
 
-		public static Func<JsonReader, object> ForType(Type type, TypeOptions options, Func<Type, TypeDescriptor> descriptorSource)
+		public static Func<JsonReader, object> ForType(Type type, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			var nullable = Nullable.GetUnderlyingType(type);
 			if(nullable != null)
@@ -26,8 +26,16 @@ namespace Liteson
 
 		private static Func<JsonReader, object> ForEnum(Type type, Func<Type, TypeDescriptor> descriptorSource)
 		{
-			var descriptor = descriptorSource(Enum.GetUnderlyingType(type));
-			var enumValues = Enum.GetValues(type).Cast<object>().ToDictionary(i => Enum.GetName(type, i));
+			var underlyingType = Enum.GetUnderlyingType(type);
+			var descriptor = descriptorSource(underlyingType);
+			var enumValues = new Dictionary<string, object>();
+			var toUnderlying = ReflectionUtils.BuildCaster(underlyingType);
+
+			foreach(var value in Enum.GetValues(type))
+			{
+				enumValues[value.ToString()] = value;
+				enumValues[toUnderlying(value).ToString()] = value;
+			}
 
 			return reader =>
 			{

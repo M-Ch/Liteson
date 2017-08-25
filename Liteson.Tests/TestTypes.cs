@@ -89,7 +89,6 @@ namespace Liteson.Tests
 	{
 		Flag1 = 1,
 		Flag2 = 8,
-		All = Flag1 | Flag2
 	}
 
 	public class WithEnum

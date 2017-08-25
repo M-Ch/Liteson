@@ -67,7 +67,7 @@ namespace Liteson
 			var descriptor = new TypeDescriptor { Type = root };
 			subDescriptors.Add(root, descriptor);
 			descriptor.Writer = TypeWriter.ForType(root, options, descriptorSource);
-			descriptor.Reader = TypeReader.ForType(root, options, descriptorSource);
+			descriptor.Reader = TypeReader.ForType(root, descriptorSource);
 			return descriptor;
 		}
 
@@ -82,8 +82,9 @@ namespace Liteson
 	[Flags]
 	internal enum TypeOptions : byte
 	{
-		None =      0b00000000,
-		CamelCase = 0b00000001
+		None =           0b00000000,
+		CamelCase =      0b00000001,
+		EnumsToStrings = 0b00000010
 	}
 
 }

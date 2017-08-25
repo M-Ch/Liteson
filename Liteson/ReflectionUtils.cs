@@ -12,6 +12,7 @@ namespace Liteson
 			.GetTypeInfo()
 			.GetDeclaredMethod(name);
 
+		private static readonly MethodInfo CastingFuncInfo = GetMethod(nameof(BuildCastingFunc));
 		private static readonly MethodInfo ParameterlessFuncInfo = GetMethod(nameof(BuildParameterlessFunc));
 		private static readonly MethodInfo ParametrizedActionClassInfo = GetMethod(nameof(BuildParametrizedActionClass));
 		private static readonly MethodInfo ParametrizedActionStructInfo = GetMethod(nameof(BuildParametrizedActionStruct));
@@ -50,6 +51,14 @@ namespace Liteson
 			var genericBuild = method.MakeGenericMethod(property.DeclaringType, property.PropertyType);
 			return (Action<object, object>)genericBuild.Invoke(null, new object[] { property.SetMethod });
 		}
+
+		public static Func<object, object> BuildCaster(Type targetType)
+		{
+			var genericCast = CastingFuncInfo.MakeGenericMethod(targetType);
+			return (Func<object, object>)genericCast.Invoke(null, Array.Empty<object>());
+		}
+
+		public static Func<object, object> BuildCastingFunc<TTarget>() => i => (TTarget)i;
 
 		public static Func<object, object> BuildParameterlessFunc<TTarget, TResult>(MethodInfo method)
 		{

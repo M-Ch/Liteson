@@ -16,15 +16,17 @@ namespace Liteson
 				return ForNullable(nullable, descriptorSource);
 
 			if (type.IsEnum)
-				return ForEnum(type, descriptorSource);
+				return ForEnum(type, options, descriptorSource);
 
 			return EnumerableType.IsAssignableFrom(type.GetTypeInfo())
 				? ForCollection(type, options, descriptorSource)
 				: ForComplex(type, options, descriptorSource);
 		}
 
-		private static Action<object, SerializationContext> ForEnum(Type type, Func<Type, TypeDescriptor> descriptorSource)
+		private static Action<object, SerializationContext> ForEnum(Type type, TypeOptions options, Func<Type, TypeDescriptor> descriptorSource)
 		{
+			if (options.HasFlag(TypeOptions.EnumsToStrings))
+				return (obj, context) => context.Writer.Write(obj.ToString());
 			var descriptor = descriptorSource(Enum.GetUnderlyingType(type));
 			return (obj, context) => descriptor.Writer(obj, context);
 		}

@@ -6,5 +6,6 @@
 		public bool Indent { get; set; }
 		public string NewLine { get; set; } = "\r\n";
 		public string Tab { get; set; } = "\t";
+		public bool EnumsToStrings { get; set; }
 	}
 }

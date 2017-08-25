@@ -152,7 +152,13 @@ namespace Liteson.Tests
 		public void FlagsToInt() => JsonConvert.Serialize(FlagEnum.Flag1 | FlagEnum.Flag2).ShouldBeEquivalentTo("9");
 
 		[Fact]
+		public void FlagsToString() => JsonConvert.Serialize(FlagEnum.Flag1 | FlagEnum.Flag2, new SerializationSettings { EnumsToStrings = true }).ShouldBeEquivalentTo("\"Flag1, Flag2\"");
+
+		[Fact]
 		public void ValueOutOfEnumToInt() => JsonConvert.Serialize((SimpleEnum) 456).ShouldBeEquivalentTo("456");
+
+		[Fact]
+		public void ValueOutOfEnumToString() => JsonConvert.Serialize((SimpleEnum)456, new SerializationSettings { EnumsToStrings = true }).ShouldBeEquivalentTo("\"456\"");
 
 		[Fact]
 		public void EnumProperty() => JsonConvert.Serialize(new WithEnum {Simple = SimpleEnum.Baz}).ShouldBeEquivalentTo("{\"Simple\":2}");
@@ -161,7 +167,18 @@ namespace Liteson.Tests
 		public void EnumNullable() => JsonConvert.Serialize(new NullableEnum()).ShouldBeEquivalentTo("{\"Simple\":null}");
 
 		[Fact]
+		public void EnumNullableToString() => JsonConvert.Serialize(new NullableEnum(), new SerializationSettings { EnumsToStrings = true }).ShouldBeEquivalentTo("{\"Simple\":null}");
+
+		[Fact]
+		public void EnumToString() => JsonConvert.Serialize(SimpleEnum.Bar, new SerializationSettings { EnumsToStrings = true }).ShouldBeEquivalentTo("\"Bar\"");
+
+		[Fact]
 		public void FilledNullableEnum() => JsonConvert.Serialize(new NullableEnum { Simple = SimpleEnum.Bar }).ShouldBeEquivalentTo("{\"Simple\":1}");
+
+		[Fact]
+		public void FilledNullableEnumToString() => JsonConvert
+			.Serialize(new NullableEnum { Simple = SimpleEnum.Bar }, new SerializationSettings { EnumsToStrings = true })
+			.ShouldBeEquivalentTo("{\"Simple\":\"Bar\"}");
 
 		private class GameData
 		{

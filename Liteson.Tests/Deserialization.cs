@@ -258,8 +258,9 @@ namespace Liteson.Tests
 		[Fact]
 		public void EnumFromInt() => JsonConvert.Deserialize<SimpleEnum>("2").ShouldBeEquivalentTo(SimpleEnum.Baz);
 
-		[Fact]
-		public void EnumFromString() => JsonConvert.Deserialize<SimpleEnum>("\"Baz\"").ShouldBeEquivalentTo(SimpleEnum.Baz);
+		[Theory]
+		[InlineData("Baz"), InlineData("2")]
+		public void EnumFromString(string input) => JsonConvert.Deserialize<SimpleEnum>($"\"{input}\"").ShouldBeEquivalentTo(SimpleEnum.Baz);
 
 		[Fact]
 		public void ValueOutOfEnumToInt() => JsonConvert.Deserialize<SimpleEnum>("-2562").ShouldBeEquivalentTo((SimpleEnum)(-2562));

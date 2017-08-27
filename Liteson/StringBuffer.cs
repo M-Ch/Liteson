@@ -39,10 +39,32 @@ namespace Liteson
 			return value;
 		}
 
+		public BufferSnapshot TakeSnapshot() => new BufferSnapshot
+		{
+			Column = Column,
+			Line = Line,
+			Position = Position
+		};
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Advance() => Position++;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsAtEnd() => Position >= _length;
+
+		public void LoadSnapshot(BufferSnapshot snapshot)
+		{
+			Line = snapshot.Line;
+			Column = snapshot.Column;
+			Position = snapshot.Position;
+		}
 	}
+
+	internal class BufferSnapshot
+	{
+		public int Line { get; set; }
+		public int Column { get; set; }
+		public int Position { get; set; }
+	}
+
 }

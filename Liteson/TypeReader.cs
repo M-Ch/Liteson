@@ -10,7 +10,7 @@ namespace Liteson
 	{
 		private static readonly TypeInfo EnumerableType = typeof(IEnumerable).GetTypeInfo();
 
-		public static Func<JsonReader, object> ForType(Type type, Func<Type, TypeDescriptor> descriptorSource)
+		public static Func<DeserializationContext, object> ForType(Type type, TypeOptions options, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			var nullable = Nullable.GetUnderlyingType(type);
 			if(nullable != null)
@@ -21,10 +21,10 @@ namespace Liteson
 
 			return EnumerableType.IsAssignableFrom(type.GetTypeInfo())
 				? ForCollection(type, descriptorSource)
-				: ForComplex(type, descriptorSource);
+				: ForComplex(type, options, descriptorSource);
 		}
 
-		private static Func<JsonReader, object> ForEnum(Type type, Func<Type, TypeDescriptor> descriptorSource)
+		private static Func<DeserializationContext, object> ForEnum(Type type, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			var underlyingType = Enum.GetUnderlyingType(type);
 			var descriptor = descriptorSource(underlyingType);
@@ -37,10 +37,11 @@ namespace Liteson
 				enumValues[toUnderlying(value).ToString()] = value;
 			}
 
-			return reader =>
+			return context =>
 			{
+				var reader = context.Reader;
 				if (reader.PeekToken().HasFlag(JsonToken.Number))
-					return Enum.ToObject(type, descriptor.Reader(reader));
+					return Enum.ToObject(type, descriptor.Reader(context));
 
 				var bufferPart = new BufferPart();
 				var token = reader.Read(ref bufferPart, out var text);
@@ -53,13 +54,14 @@ namespace Liteson
 			};
 		}
 
-		private static Func<JsonReader, object> ForNullable(Type underlyingType, Func<Type, TypeDescriptor> descriptorSource)
+		private static Func<DeserializationContext, object> ForNullable(Type underlyingType, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			var descriptor = descriptorSource(underlyingType);
-			return reader =>
+			return context =>
 			{
+				var reader = context.Reader;
 				if (reader.PeekToken() != JsonToken.Null)
-					return descriptor.Reader(reader);
+					return descriptor.Reader(context);
 
 				var bufferPart = new BufferPart();
 				var token = reader.Read(ref bufferPart, out var _);
@@ -70,14 +72,15 @@ namespace Liteson
 			};
 		}
 
-		private static Func<JsonReader, object> ForCollection(Type type, Func<Type, TypeDescriptor> descriptorSource)
+		private static Func<DeserializationContext, object> ForCollection(Type type, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			var element = ReflectionUtils.FindCollectionElementType(type);
 			var constructor = ReflectionUtils.BuildConstructor(typeof(List<>).MakeGenericType(element));
 			var elementDescriptor = descriptorSource(element);
 
-			return reader =>
+			return context =>
 			{
+				var reader = context.Reader;
 				var bufferPart = new BufferPart();
 				var token = reader.Read(ref bufferPart, out var _);
 				if (token == JsonToken.Null)
@@ -110,7 +113,7 @@ namespace Liteson
 							throw Exceptions.BadToken(reader, token, JsonToken.ValueSeparator);
 					}
 
-					var item = elementDescriptor.Reader(reader);
+					var item = elementDescriptor.Reader(context);
 					target.Add(item);
 
 					isFirst = false;
@@ -118,11 +121,13 @@ namespace Liteson
 			};
 		}
 
-		private static Func<JsonReader, object> ForComplex(Type type, Func<Type, TypeDescriptor> descriptorSource)
+		private static Func<DeserializationContext, object> ForComplex(Type type, TypeOptions options, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			var info = type.GetTypeInfo();
 			if(info.IsClass && info.GetConstructor(Array.Empty<Type>()) == null)
-				return reader => throw new JsonException($"Type {type} must define public parameterless constructor.");
+				return reader => throw new JsonException(info.IsAbstract 
+					? $"Type {type} is abstract. Add {nameof(ITypeSelector)} to {nameof(SerializationSettings)} in order to deserialize this type." 
+					: $"Type {type} must define public parameterless constructor.");
 
 			var properties = info
 				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
@@ -135,7 +140,7 @@ namespace Liteson
 
 			var all = properties
 				.Concat(fields)
-				.SelectMany(i => JsonNames(i.Property).Select(j => new {Name = j, i.Setter, i.Descriptor}))
+				.SelectMany(i => JsonNames(i.Property).Select(j => new PropertyBinding {Name = j, Setter = i.Setter, Descriptor = i.Descriptor}))
 				.GroupBy(i => i.Name)
 				.ToDictionary(i => i.Key, i => i.First());
 
@@ -148,40 +153,80 @@ namespace Liteson
 				? new Func<object, object>(i => ((IBox) i).Value)
 				: null;
 
-			return reader =>
+			return context =>
 			{
 				var bufferPart = new BufferPart();
+				var reader = context.Reader;
 				var token = reader.Read(ref bufferPart, out var _);
 				if (token == JsonToken.Null)
 					return info.IsClass ? (object)null : throw new JsonException($"Unable to assign null value to struct type near line {reader.Line}, column {reader.Column}.");
 				if (token != JsonToken.ObjectStart)
 					throw Exceptions.BadToken(reader, token, JsonToken.ObjectStart);
 				var target = constructor();
-				while (true)
+				var deferred = ReadProperties(target, context, all);
+				var unwrapped = unwrapper != null ? unwrapper(target) : target;
+				if (deferred == null)
+					return unwrapped;
+
+				foreach (var entry in deferred)
 				{
-					token = reader.Read(ref bufferPart, out var propertyName);
-					if (token == JsonToken.ObjectEnd)
-						return unwrapper != null ? unwrapper(target) : target;
-					if (token != JsonToken.String)
-						throw Exceptions.BadToken(reader, token, JsonToken.String);
-
-					var hasProperty = all.TryGetValue(propertyName, out var property);
-					token = reader.Read(ref bufferPart, out var _);
-					if (token != JsonToken.NameSeparator)
-						throw Exceptions.BadToken(reader, token, JsonToken.NameSeparator);
-
-					if (hasProperty)
-						property.Setter(target, property.Descriptor.Reader(reader));
-					else
-						ValueSkipper.SkipNext(reader);
-
-					token = reader.Read(ref bufferPart, out var _);
-					if (token == JsonToken.ObjectEnd)
-						return unwrapper != null ? unwrapper(target) : target;
-					if(token != JsonToken.ValueSeparator)
-						throw Exceptions.BadToken(reader, token, JsonToken.ValueSeparator);
+					var runtimeType = entry.Selector.FindPropertyType(entry.Binding.Name, unwrapped);
+					var descriptor = context.Catalog.GetDescriptor(runtimeType, options);
+					using (reader.LoadSnapshot(entry.Snapshot))
+						entry.Binding.Setter(target, descriptor.Reader(context));
 				}
+				return unwrapper != null ? unwrapper(target) : target;
 			};
+		}
+
+		private static IEnumerable<DeferredEntry> ReadProperties(object target, DeserializationContext context, IReadOnlyDictionary<string, PropertyBinding> all)
+		{
+			var bufferPart = new BufferPart();
+			var reader = context.Reader;
+			List<DeferredEntry> deferred = null;
+
+			while(true)
+			{
+				var token = reader.Read(ref bufferPart, out var propertyName);
+				if(token == JsonToken.ObjectEnd)
+					return deferred;
+				if(token != JsonToken.String)
+					throw Exceptions.BadToken(reader, token, JsonToken.String);
+
+				var hasProperty = all.TryGetValue(propertyName, out var property);
+				token = reader.Read(ref bufferPart, out var _);
+				if(token != JsonToken.NameSeparator)
+					throw Exceptions.BadToken(reader, token, JsonToken.NameSeparator);
+
+				if(hasProperty)
+				{
+					ITypeSelector typeSelector = null;
+					var shouldDeffer = context.TypeSelectors?.TryGetValue(property.Descriptor.Type, out typeSelector) == true;
+					if(!shouldDeffer)
+						property.Setter(target, property.Descriptor.Reader(context));
+					else
+					{
+						var entry = new DeferredEntry
+						{
+							Selector = typeSelector,
+							Binding = property,
+							Snapshot = reader.TakeSnapshot()
+						};
+						ValueSkipper.SkipNext(reader);
+						if(deferred == null)
+							deferred = new List<DeferredEntry>();
+						deferred.Add(entry);
+					}
+				}
+				else
+					ValueSkipper.SkipNext(reader);
+
+				token = reader.Read(ref bufferPart, out var _);
+				if(token == JsonToken.ObjectEnd)
+					return deferred;
+				if(token != JsonToken.ValueSeparator)
+					throw Exceptions.BadToken(reader, token, JsonToken.ValueSeparator);
+			}
 		}
 
 		private static IEnumerable<string> JsonNames(MemberInfo property)
@@ -196,6 +241,20 @@ namespace Liteson
 			yield return property.Name;
 			yield return CamelCase.ToCamelCase(property.Name);
 			yield return property.Name.ToLower();
+		}
+
+		private class PropertyBinding
+		{
+			public string Name { get; set; }
+			public Action<object, object> Setter { get; set; }
+			public TypeDescriptor Descriptor { get; set; }
+		}
+
+		private class DeferredEntry
+		{
+			public PropertyBinding Binding { get; set; }
+			public ITypeSelector Selector { get; set; }
+			public BufferSnapshot Snapshot { get; set; }
 		}
 	}
 }

@@ -237,6 +237,15 @@ namespace Liteson
 			}
 		}
 
+		public IDisposable LoadSnapshot(BufferSnapshot snapshot)
+		{
+			var buffer = _buffer;
+			_buffer.LoadSnapshot(snapshot);
+			return Actions.OnDispose(() => _buffer = buffer);
+		}
+
+		public BufferSnapshot TakeSnapshot() => _buffer.TakeSnapshot();
+
 		private class DebuggerProxy
 		{
 			private readonly JsonReader _reader;

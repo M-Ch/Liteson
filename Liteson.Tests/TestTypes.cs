@@ -117,4 +117,30 @@ namespace Liteson.Tests
 		Second = 1241234123423
 	}
 
+	public abstract class BaseType
+	{
+	}
+
+	public class SubTypeA : BaseType
+	{
+		public int Value { get; set; }
+	}
+
+	public class SubTypeB : BaseType
+	{
+		public string Value { get; set; }
+	}
+
+	public class WithDerivedTypes
+	{
+		public BaseType Property { get; set; }
+		public char DataType { get; set; }
+	}
+
+	public class NestedDerivedTypes
+	{
+		public WithDerivedTypes First { get; set; }
+		public WithDerivedTypes Second { get; set; }
+		public bool Bool { get; set; }
+	}
 }

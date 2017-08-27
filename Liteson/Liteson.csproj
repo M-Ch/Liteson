@@ -40,11 +40,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Actions.cs" />
     <Compile Include="Base64.cs" />
     <Compile Include="BufferPart.cs" />
     <Compile Include="CamelCase.cs" />
+    <Compile Include="DeserializationContext.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Formatting.cs" />
+    <Compile Include="ITypeSelector.cs" />
     <Compile Include="JsonConvert.cs" />
     <Compile Include="JsonException.cs" />
     <Compile Include="JsonPropertyAttribute.cs" />

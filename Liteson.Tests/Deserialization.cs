@@ -307,6 +307,52 @@ namespace Liteson.Tests
 		[Fact]
 		public void FlagsToInt() => JsonConvert.Deserialize<FlagEnum>("9").ShouldBeEquivalentTo(FlagEnum.Flag1 | FlagEnum.Flag2);
 
+		[Fact]
+		public void TypeSelectionInRuntime()
+		{
+			var settings = new SerializationSettings().AddTypeSelector(new DerivedTypeSelector());
+			var input = "{\"DataType\":\"B\",\"Property\":{\"Value\":\"test\"}}";
+			JsonConvert.Deserialize<WithDerivedTypes>(input, settings).ShouldBeEquivalentTo(new WithDerivedTypes
+			{
+				DataType = 'B',
+				Property = new SubTypeB
+				{
+					Value = "test"
+				}
+			});
+		}
+
+		[Fact]
+		public void TypeSelectionInRuntimeNestedProperties()
+		{
+			var settings = new SerializationSettings().AddTypeSelector(new DerivedTypeSelector());
+			var input = "{\"First\":{\"DataType\":\"B\",\"Property\":{\"Value\":\"test\"}},\"Second\":{\"DataType\":\"A\",\"Property\":{\"Value\":123}},\"Bool\":true}";
+			JsonConvert.Deserialize<NestedDerivedTypes>(input, settings).ShouldBeEquivalentTo(new NestedDerivedTypes
+			{
+				First = new WithDerivedTypes
+				{
+					DataType = 'B',
+					Property = new SubTypeB { Value = "test" }
+				},
+				Second = new WithDerivedTypes
+				{
+					DataType = 'A',
+					Property = new SubTypeA { Value = 123 }
+				},
+				Bool = true
+			});
+		}
+
+		private class DerivedTypeSelector : ITypeSelector
+		{
+			public Type SupportedType => typeof(BaseType);
+			public Type FindPropertyType(string property, object parent)
+			{
+				var source = (WithDerivedTypes) parent;
+				return source.DataType == 'A' ? typeof(SubTypeA) : typeof(SubTypeB);
+			}
+		}
+
 
 		//[Fact] //run in release mode
 		public void Performance()

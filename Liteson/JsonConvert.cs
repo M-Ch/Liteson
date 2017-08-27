@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Liteson
@@ -14,8 +15,13 @@ namespace Liteson
 		public static T Deserialize<T>(string value, SerializationSettings settings)
 		{
 			var descriptor = Catalog.GetDescriptor(typeof(T), OptionsFromSettings(settings));
-			var reader = new JsonReader(value);
-			return (T)descriptor.Reader(reader);
+			var context = new DeserializationContext
+			{
+				Catalog = Catalog,
+				TypeSelectors = settings.TypeSelectors.Count > 0 ? settings.TypeSelectors.ToDictionary(i => i.Key, i => i.Value) : null,
+				Reader = new JsonReader(value)
+			};
+			return (T)descriptor.Reader(context);
 		}
 
 		public static string Serialize(object value, SerializationSettings settings)

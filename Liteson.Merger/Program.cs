@@ -50,7 +50,12 @@ namespace Liteson.Merger
 
 			var formatted = Formatter.Format(result, new AdhocWorkspace());
 			var text = formatted.ToFullString();
-			File.WriteAllText(Path.Combine(slnDir, "Liteson.merged.cs"), text.Replace("\t", "    "));
+			var license = File.ReadAllLines(Path.Combine(slnDir, "License.txt"));
+			license[0] = "/*" + license[0];
+			license[license.Length - 1] = license.Last() + "*/";
+
+			var fullText = string.Join(Environment.NewLine, license) + Environment.NewLine + text.Replace("\t", "    ");
+			File.WriteAllText(Path.Combine(slnDir, "Liteson.merged.cs"), fullText);
 		}
 
 		private static BaseTypeDeclarationSyntax RewriteAccess(BaseTypeDeclarationSyntax declaration)

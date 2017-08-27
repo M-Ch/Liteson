@@ -72,13 +72,33 @@ namespace Liteson
 			target.Write((char)('0' + second));
 		}
 
-		//The MIT License (MIT)
+		/* GetDatePart method:
+		 * The MIT License (MIT)
+			Copyright (c) .NET Foundation and Contributors
+
+			All rights reserved.
+
+			Permission is hereby granted, free of charge, to any person obtaining a copy
+			of this software and associated documentation files (the "Software"), to deal
+			in the Software without restriction, including without limitation the rights
+			to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+			copies of the Software, and to permit persons to whom the Software is
+			furnished to do so, subject to the following conditions:
+
+			The above copyright notice and this permission notice shall be included in all
+			copies or substantial portions of the Software.
+
+			THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+			IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+			FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+			AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+			LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+			OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+			SOFTWARE.*/
 		//https://github.com/dotnet/coreclr/blob/master/src/mscorlib/shared/System/DateTime.cs
 
-		private static readonly int[] DaysToMonth365 = {
-			0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
-		private static readonly int[] DaysToMonth366 = {
-			0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366};
+		private static readonly int[] DaysToMonth365 = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
+		private static readonly int[] DaysToMonth366 = { 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366};
 
 		// Number of 100ns ticks per time unit
 		private const long TicksPerMillisecond = 10000;
@@ -99,23 +119,23 @@ namespace Liteson
 		private static void GetDatePart(long ticks, out int year, out int month, out int day)
 		{
 			// n = number of days since 1/1/0001
-			int n = (int)(ticks / TicksPerDay);
+			var n = (int)(ticks / TicksPerDay);
 			// y400 = number of whole 400-year periods since 1/1/0001
-			int y400 = n / DaysPer400Years;
+			var y400 = n / DaysPer400Years;
 			// n = day number within 400-year period
 			n -= y400 * DaysPer400Years;
 			// y100 = number of whole 100-year periods within 400-year period
-			int y100 = n / DaysPer100Years;
+			var y100 = n / DaysPer100Years;
 			// Last 100-year period has an extra day, so decrement result if 4
 			if(y100 == 4) y100 = 3;
 			// n = day number within 100-year period
 			n -= y100 * DaysPer100Years;
 			// y4 = number of whole 4-year periods within 100-year period
-			int y4 = n / DaysPer4Years;
+			var y4 = n / DaysPer4Years;
 			// n = day number within 4-year period
 			n -= y4 * DaysPer4Years;
 			// y1 = number of whole years within 4-year period
-			int y1 = n / DaysPerYear;
+			var y1 = n / DaysPerYear;
 			// Last year has an extra day, so decrement result if 4
 			if(y1 == 4) y1 = 3;
 			// compute year
@@ -125,11 +145,11 @@ namespace Liteson
 			// dayOfYear = n + 1;
 			// Leap year calculation looks different from IsLeapYear since y1, y4,
 			// and y100 are relative to year 1, not year 0
-			bool leapYear = y1 == 3 && (y4 != 24 || y100 == 3);
-			int[] days = leapYear ? DaysToMonth366 : DaysToMonth365;
+			var leapYear = y1 == 3 && (y4 != 24 || y100 == 3);
+			var days = leapYear ? DaysToMonth366 : DaysToMonth365;
 			// All months have less than 32 days, so n >> 5 is a good conservative
 			// estimate for the month
-			int m = (n >> 5) + 1;
+			var m = (n >> 5) + 1;
 			// m = 1-based month number
 			while(n >= days[m]) m++;
 			// compute month and day

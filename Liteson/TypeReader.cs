@@ -124,7 +124,7 @@ namespace Liteson
 		private static Func<DeserializationContext, object> ForComplex(Type type, TypeOptions options, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			var info = type.GetTypeInfo();
-			if(info.IsClass && info.GetConstructor(Array.Empty<Type>()) == null)
+			if(info.IsClass && info.GetConstructor(Type.EmptyTypes) == null)
 				return reader => throw new JsonException(info.IsAbstract 
 					? $"Type {type} is abstract. Add {nameof(ITypeSelector)} to {nameof(SerializationSettings)} in order to deserialize this type." 
 					: $"Type {type} must define public parameterless constructor.");

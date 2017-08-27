@@ -26,7 +26,7 @@ namespace Liteson
 		public static Func<object> BuildConstructor(Type type)
 		{
 			var genericBuild = BuildConstructorInfo.MakeGenericMethod(type);
-			return (Func<object>)genericBuild.Invoke(null, Array.Empty<object>());
+			return (Func<object>)genericBuild.Invoke(null, Empty.ObjectArray);
 		}
 
 		public static Type FindCollectionElementType(Type enumerableType)
@@ -55,7 +55,7 @@ namespace Liteson
 		public static Func<object, object> BuildCaster(Type targetType)
 		{
 			var genericCast = CastingFuncInfo.MakeGenericMethod(targetType);
-			return (Func<object, object>)genericCast.Invoke(null, Array.Empty<object>());
+			return (Func<object, object>)genericCast.Invoke(null, Empty.ObjectArray);
 		}
 
 		public static Func<object, object> BuildCastingFunc<TTarget>() => i => (TTarget)i;

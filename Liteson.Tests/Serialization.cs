@@ -107,9 +107,11 @@ namespace Liteson.Tests
 		private class PrivateDataClass
 		{
 			public int Value { get; set; }
+#pragma warning disable 414
 			private int _int = 10;
 			private string Foo { get; set; } = "foo";
 			private static bool _static = true;
+#pragma warning restore 414
 			private static string BarStatic { get; set; } = "bar";
 		}
 

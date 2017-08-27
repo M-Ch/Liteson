@@ -16,7 +16,7 @@ namespace Liteson
 			if(nullable != null)
 				return ForNullable(nullable, descriptorSource);
 
-			if (type.IsEnum)
+			if (type.GetTypeInfo().IsEnum)
 				return ForEnum(type, descriptorSource);
 
 			return EnumerableType.IsAssignableFrom(type.GetTypeInfo())

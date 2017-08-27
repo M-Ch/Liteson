@@ -50,11 +50,13 @@ namespace Liteson.Merger
 
 			var formatted = Formatter.Format(result, new AdhocWorkspace());
 			var text = formatted.ToFullString();
-			var license = File.ReadAllLines(Path.Combine(slnDir, "License.txt"));
-			license[0] = "/*" + license[0];
-			license[license.Length - 1] = license.Last() + "*/";
+			var allText = File.ReadAllLines(Path.Combine(slnDir, "LICENSE")).ToList();
+			allText[0] = "/*" + allText[0];
+			allText[allText.Count - 1] = allText.Last() + "*/";
+			allText.Add("//https://github.com/M-Ch/Liteson");
+			allText.Add(Environment.NewLine);
 
-			var fullText = string.Join(Environment.NewLine, license) + Environment.NewLine + text.Replace("\t", "    ");
+			var fullText = string.Join(Environment.NewLine, allText) + text.Replace("\t", "    ");
 			File.WriteAllText(Path.Combine(slnDir, "Liteson.merged.cs"), fullText);
 		}
 

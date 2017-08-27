@@ -10,6 +10,7 @@ namespace Liteson
 		public bool Indent { get; set; }
 		public string NewLine { get; set; } = "\r\n";
 		public string Tab { get; set; } = "\t";
+		public int MaxDepth { get; set; } = 20;
 		public bool EnumsToStrings { get; set; }
 		internal Dictionary<Type, ITypeSelector> TypeSelectors { get; } = new Dictionary<Type, ITypeSelector>();
 

@@ -34,7 +34,7 @@ namespace Liteson
 			var context = new SerializationContext
 			{
 				Writer = new JsonWriter(sw, settings),
-				Depth = 10 //todo
+				Depth = 20 
 			};
 
 			descriptor.Writer(value, context);

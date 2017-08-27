@@ -19,7 +19,7 @@ namespace Liteson
 				return ForEnum(type, options, descriptorSource);
 
 			return EnumerableType.IsAssignableFrom(type.GetTypeInfo())
-				? ForCollection(type, options, descriptorSource)
+				? ForCollection(type, descriptorSource)
 				: ForComplex(type, options, descriptorSource);
 		}
 
@@ -43,7 +43,7 @@ namespace Liteson
 			};
 		}
 
-		private static Action<object, SerializationContext> ForCollection(Type root, TypeOptions options, Func<Type, TypeDescriptor> descriptorSource)
+		private static Action<object, SerializationContext> ForCollection(Type root, Func<Type, TypeDescriptor> descriptorSource)
 		{
 			var elementType = ReflectionUtils.FindCollectionElementType(root);
 			var descriptor = descriptorSource(elementType);
@@ -57,11 +57,13 @@ namespace Liteson
 					return;
 				}
 				writer.BeginArray();
+				context.Depth--;
 				foreach(var item in (IEnumerable)obj)
 				{
 					writer.ArrayItem();
 					descriptor.Writer(item, context);
 				}
+				context.Depth++;
 				writer.EndArray();
 			};
 		}
@@ -90,7 +92,7 @@ namespace Liteson
 			return (obj, context) =>
 			{
 				if (context.Depth <= 0)
-					throw new Exception("To deep [todo]");
+					throw new JsonException("Object was too deep.");
 				var writer = context.Writer;
 				if (obj == null)
 				{
@@ -109,7 +111,9 @@ namespace Liteson
 					var getter = item.Getter;
 					writer.PropertyName(item.Name);
 					var value = getter(obj);
+					context.Depth--;
 					item.Descriptor.Writer(value, context);
+					context.Depth++;
 				}
 				context.Writer.EndObject();
 			};

@@ -180,6 +180,17 @@ namespace Liteson.Tests
 			.Serialize(new NullableEnum { Simple = SimpleEnum.Bar }, new SerializationSettings { EnumsToStrings = true })
 			.ShouldBeEquivalentTo("{\"Simple\":\"Bar\"}");
 
+		[Fact]
+		public void TooDeepStructure()
+		{
+			var data = new LinkedNode
+			{
+				Value = 10
+			};
+			data.Next = data;
+			Assert.Throws<JsonException>(() => JsonConvert.Serialize(data));
+		}
+
 		private class GameData
 		{
 			public int Id { get; set; }

@@ -143,4 +143,10 @@ namespace Liteson.Tests
 		public WithDerivedTypes Second { get; set; }
 		public bool Bool { get; set; }
 	}
+
+	public class LinkedNode
+	{
+		public int Value { get; set; }
+		public LinkedNode Next { get; set; }
+	}
 }
